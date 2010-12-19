@@ -19,6 +19,7 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
 import org.springframework.web.servlet.View
+import org.springframework.web.servlet.view.AbstractUrlBasedView
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver
 
 import org.springframework.grails.freemarker.GrailsFreeMarkerViewResolver
@@ -28,7 +29,9 @@ import org.springframework.grails.freemarker.GrailsFreeMarkerViewResolver
  */
 public class DynamicTagLibViewResolver /*extends GrailsFreeMarkerViewResolver*/ extends FreeMarkerViewResolver {
 
-  private static final Log log = LogFactory.getLog(getClass())  
+  private static final Log log = LogFactory.getLog(getClass()) 
+
+  private AutoConfigHelper helper = new AutoConfigHelper()
 
   public DynamicTagLibViewResolver() {
     log.debug("constructor()")
@@ -52,6 +55,21 @@ public class DynamicTagLibViewResolver /*extends GrailsFreeMarkerViewResolver*/ 
     if (log.isDebugEnabled()) {
       log.debug("loadView(): view " + view)
     }
+    return view
+  }
+
+
+  @Override
+  protected AbstractUrlBasedView buildView(String viewName) throws Exception {
+    if (log.isDebugEnabled()) {
+      log.debug("buildView(): viewName " + viewName)
+    }
+
+    def view = super.buildView(viewName)
+    if (view) {
+      view.setAutoConfigHelper(helper)
+    }
+
     return view
   }
 

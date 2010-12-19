@@ -49,6 +49,8 @@ class DynamicTagLibDirective implements TemplateDirectiveModel {
   private final Log log = LogFactory.getLog(getClass())
   private static final String TAG_LIBS_ATTRIBUTE = DynamicTagLibDirective.class.getName().replace(".", "-") + "-TAG_LIBS"
 
+  def private static RESERVED_WORDS_TRANSLATION = [as:"_as"]
+
   private String tagLibName
   private String tagName
 
@@ -94,7 +96,13 @@ class DynamicTagLibDirective implements TemplateDirectiveModel {
       if (hasUnwrap && value) {
 	value = objWrapper.unwrap(value)
       }
-      unwrappedParams.put(it.key, value)
+
+      def key = RESERVED_WORDS_TRANSLATION.get(it.key)
+      if (!key) {
+	key = it.key
+      }
+
+      unwrappedParams.put(key, value)
     }
 
     try {
