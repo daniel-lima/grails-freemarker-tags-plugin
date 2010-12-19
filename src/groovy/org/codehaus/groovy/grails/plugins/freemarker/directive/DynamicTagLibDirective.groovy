@@ -46,15 +46,15 @@ import org.codehaus.groovy.grails.web.pages.GroovyPage
  */
 class DynamicTagLibDirective implements TemplateDirectiveModel {
 
-  private static final Log LOG = LogFactory.getLog(DynamicTagLibDirective.class)
+  private final Log log = LogFactory.getLog(getClass())
   private static final String TAG_LIBS_ATTRIBUTE = DynamicTagLibDirective.class.getName().replace(".", "-") + "-TAG_LIBS"
 
   private String tagLibName
   private String tagName
 
   public DynamicTagLibDirective(String tagLibName, String tagName) {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("constructor(): " + tagLibName + "." + tagName)
+    if (log.isDebugEnabled()) {
+      log.debug("constructor(): " + tagLibName + "." + tagName)
     }
     this.tagLibName = tagLibName
     this.tagName = tagName
@@ -64,9 +64,9 @@ class DynamicTagLibDirective implements TemplateDirectiveModel {
 		      Map params, TemplateModel[] loopVars,
 		      TemplateDirectiveBody body)
   throws TemplateException, IOException {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("execute(): " + tagLibName + "." + tagName)      
-      LOG.debug("execute(): env=" + env + "; params=" + params + "; body=" + body)
+    if (log.isDebugEnabled()) {
+      log.debug("execute(): " + tagLibName + "." + tagName)      
+      log.debug("execute(): env=" + env + "; params=" + params + "; body=" + body)
     }
     def tagLib = getDynamicTagLib(env)
     if (!tagLib) {
@@ -86,8 +86,8 @@ class DynamicTagLibDirective implements TemplateDirectiveModel {
     def hasUnwrap = objWrapper.metaClass.respondsTo(objWrapper, "unwrap")
     def unwrappedParams = new LinkedHashMap()
 
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("execute(): hasUnwrap " + hasUnwrap)
+    if (log.isDebugEnabled()) {
+      log.debug("execute(): hasUnwrap " + hasUnwrap)
     }
     params.each {
       def value = it.value
@@ -102,7 +102,7 @@ class DynamicTagLibDirective implements TemplateDirectiveModel {
 	closure(unwrappedParams)
       } else {
 	closure(unwrappedParams) {
-	  LOG.debug("executeBody(): " + tagLibName + "." + tagName)
+	  log.debug("executeBody(): " + tagLibName + "." + tagName)
 	  if (body) {
 	    body.render(env.getOut())
 	  } else {
@@ -114,8 +114,8 @@ class DynamicTagLibDirective implements TemplateDirectiveModel {
       throw new TemplateException(e, env)
     }
 
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("execute(): tag executed")
+    if (log.isDebugEnabled()) {
+      log.debug("execute(): tag executed")
     }
 
     /*def exception = tagLib.getProperty(TagLibDynamicMethods.THROW_TAG_ERROR_METHOD)
@@ -131,10 +131,10 @@ class DynamicTagLibDirective implements TemplateDirectiveModel {
     def appContext = application.getMainContext()
     
     GrailsTagLibClass tagLibClass = (GrailsTagLibClass) application.getArtefactForFeature(
-      TagLibArtefactHandler.TYPE, GroovyPage.DEFAULT_NAMESPACE + ':' + this.tagLibName)
+      TagLibArtefactHandler.TYPE, /*GroovyPage.DEFAULT_NAMESPACE + ':' + */this.tagLibName)
     GroovyObject tagLib = null
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("getDynamicTagLib(): tagLibClass " + tagLibClass)
+    if (log.isDebugEnabled()) {
+      log.debug("getDynamicTagLib(): tagLibClass " + tagLibClass)
     }
     if (tagLibClass) {
       def tagLibFullName = tagLibClass.getFullName()
@@ -147,8 +147,8 @@ class DynamicTagLibDirective implements TemplateDirectiveModel {
       }
     }
 
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("getDynamicTagLib(): tagLib " + tagLib)
+    if (log.isDebugEnabled()) {
+      log.debug("getDynamicTagLib(): tagLib " + tagLib)
     }
     
     return tagLib
