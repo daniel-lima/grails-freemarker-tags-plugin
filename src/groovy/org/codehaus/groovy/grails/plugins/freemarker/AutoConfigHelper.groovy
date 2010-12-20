@@ -32,20 +32,54 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
  */
 public class AutoConfigHelper {
 
+  //public static final String GRAILS_CONFIG_NAMESPACE = "grails.plugins.freemarkertags"
+
   private final Log log = LogFactory.getLog(getClass())
   
+  private final String ftlExtension
   private StringTemplateLoader stringLoader  = null
+
+  public AutoConfigHelper() {
+    this(".ftl")
+  }
+
+  public AutoConfigHelper(String ftlExtension) {
+    this.ftlExtension = ftlExtension
+    if (log.isDebugEnabled()) {
+      log.debug("constructor(): ftlExtension '" + ftlExtension + "'")
+    }
+  }
 
   public Configuration autoConfigure(boolean reload = false, Configuration configuration) {
     if (log.isDebugEnabled()) {
       log.debug("autoConfigure(): reload " + reload + ", configuration " + configuration)
     }
     if (configuration) {
+      String dynamicDirectiveClassName = DynamicTagLibDirective.class.getName()
+      String dynamicFunctionClassName = DynamicTagLibFunction.class.getName()
       def oldLoader = configuration.templateLoader
       def autoImport = [:]
       if (!stringLoader || reload) {
 	def lf = System.getProperty("line.separator")
-	GrailsApplication application =  ApplicationHolder.getApplication()
+	
+	GrailsApplication application = ApplicationHolder.getApplication()
+	def grailsConfig = [
+	  autoImport: true,
+	  defineFunctions: true
+	]
+	def grailsReconfig = application.config.grails.plugins.freemarkertags
+	if (grailsReconfig instanceof ConfigObject) {
+	  grailsReconfig = grailsReconfig.toProperties()
+	}
+	if (log.isDebugEnabled()) {
+	  log.debug("autoConfigure(): grailsConfig " + grailsConfig)
+	  log.debug("autoConfigure(): grailsReconfig " + grailsReconfig)
+	}
+	grailsConfig.putAll(grailsReconfig)
+	if (log.isDebugEnabled()) {
+	  log.debug("autoConfigure(): grailsConfig " + grailsConfig)
+	}	
+
 	def templates = [:]
 	application.tagLibClasses.each {
 	  tagLibClass ->
@@ -59,14 +93,19 @@ public class AutoConfigHelper {
 	    tagLibClass.tagNames.each {
 	      tagName ->
 	      template.append('[#assign ' + tagName + ' =' +
-			      '"org.codehaus.groovy.grails.plugins.freemarker.directive.DynamicTagLibDirective"?new("' + tagLibClass.namespace + '", "' + tagName + '")]')
+			      '"' + dynamicDirectiveClassName + '"?new("' + tagLibClass.namespace + '", "' + tagName + '")]')
 	      template.append(lf)
+	      if (grailsConfig.defineFunctions) {
+		template.append('[#assign _' + tagName + ' =' +
+				'"' + dynamicFunctionClassName + '"?new("' + tagLibClass.namespace + '", "' + tagName + '")]')
+		template.append(lf)
+	      }
 	    }
 	}
 	
 	stringLoader = new StringTemplateLoader()
 	templates.each {
-	  def key = /*"/" +*/ it.key + ".ftl"
+	  def key = /*"/" +*/ it.key + this.ftlExtension
 	  def value = it.value.toString()
 	  if (log.isDebugEnabled()) {
 	    log.debug("autoConfigure(): template " + key)
@@ -74,7 +113,9 @@ public class AutoConfigHelper {
 	  }
 
 	  stringLoader.putTemplate(key, value)
-	  autoImport.put(it.key, key)
+	  if (grailsConfig.autoImport) {
+	    autoImport.put(it.key, key)
+	  }
 	}
 
 	templates = null

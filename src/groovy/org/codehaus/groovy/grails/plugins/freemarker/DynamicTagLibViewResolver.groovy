@@ -31,7 +31,7 @@ public class DynamicTagLibViewResolver /*extends GrailsFreeMarkerViewResolver*/ 
 
   private static final Log log = LogFactory.getLog(getClass()) 
 
-  private AutoConfigHelper helper = new AutoConfigHelper()
+  private AutoConfigHelper helper = null
 
   public DynamicTagLibViewResolver() {
     log.debug("constructor()")
@@ -49,7 +49,7 @@ public class DynamicTagLibViewResolver /*extends GrailsFreeMarkerViewResolver*/ 
     } catch(e) {
       // return null if an exception occurs so the rest of the view
       // resolver chain gets an opportunity to  generate a View
-      log.error("loadView()", e)
+      log.warning("loadView()", e)
     }
 
     if (log.isDebugEnabled()) {
@@ -71,6 +71,17 @@ public class DynamicTagLibViewResolver /*extends GrailsFreeMarkerViewResolver*/ 
     }
 
     return view
+  }
+
+
+  @Override
+  public void setPrefix(String prefix) {
+    if (log.isDebugEnabled()) {
+      log.debug("setPrefix(): prefix " + prefix)
+    }  
+
+    super.setPrefix(prefix)
+    helper = new AutoConfigHelper(prefix)
   }
 
 }
