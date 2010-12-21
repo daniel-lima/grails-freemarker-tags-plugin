@@ -53,6 +53,19 @@ public class BaseDynamicTagLibSupport {
     this.tagName = tagName
   }
 
+  protected String getOutputEncoding(Environment env) {
+    String encoding = env.getOutputEncoding()
+    if (!encoding) {
+      def config = env.getConfiguration()
+      //encoding = config.getEncoding(null)
+      //if (!encoding) {
+      encoding = config.getDefaultEncoding()
+      //}
+    }
+    
+    return encoding
+  }
+
   protected Map unwrapParams(TemplateHashModelEx params, boolean translateReservedWords = true) {
     Map unwrappedParams = new LinkedHashMap()
 
@@ -103,19 +116,30 @@ public class BaseDynamicTagLibSupport {
   }
 
 
+  protected boolean doesReturnObject() {
+    GrailsTagLibClass tagLibClass = getDynamicTagLibClass()
+    def tagNamesThatReturnObject = tagLibClass.getTagNamesThatReturnObject()
+    def result = tagNamesThatReturnObject.contains(this.tagName)
+    if (log.isDebugEnabled()) {
+      //log.debug("doesReturnObject(): tagNamesThatReturnObject = " + tagNamesThatReturnObject)
+      log.debug("doesReturnObject(): " + result)
+    }
+    return result
+  }
+
   protected GroovyObject getDynamicTagLib(Environment env) {
     def tagLibs = getTagLibsCache(env)
     GrailsApplication application =  ApplicationHolder.getApplication()
     def appContext = application.getMainContext()
     
-    GrailsTagLibClass tagLibClass = (GrailsTagLibClass) application.getArtefactForFeature(
-      TagLibArtefactHandler.TYPE, this.tagLibName)
+    GrailsTagLibClass tagLibClass = getDynamicTagLibClass(application)
     GroovyObject tagLib = null
     if (log.isDebugEnabled()) {
       log.debug("getDynamicTagLib(): tagLibClass " + tagLibClass)
     }
     if (tagLibClass) {
       def tagLibFullName = tagLibClass.getFullName()
+      log.debug("getDynamicTagLib(): tagLibFullName " + tagLibFullName)
       if (tagLibs.containsKey(tagLibFullName)) {
 	tagLib = (GroovyObject) tagLibs.get(tagLibFullName)
       }
@@ -131,7 +155,16 @@ public class BaseDynamicTagLibSupport {
     
     return tagLib
   }
-  
+
+
+  private GrailsTagLibClass getDynamicTagLibClass(GrailsApplication application = null) {
+    if (!application) {
+      application =  ApplicationHolder.getApplication()
+    }
+    GrailsTagLibClass tagLibClass = (GrailsTagLibClass) application.getArtefactForFeature(
+      TagLibArtefactHandler.TYPE, this.tagLibName + ":" + this.tagName)
+    return tagLibClass
+  }  
 
   private Map<String, GroovyObject> getTagLibsCache(Environment env) {
     def cache = env.getVariable(TAG_LIBS_VARIABLE)

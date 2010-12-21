@@ -59,45 +59,43 @@ public class DynamicTagLibFunction extends BaseDynamicTagLibSupport implements T
 	  "Could not find tag " + this.tagName);
       }
       
-      String encoding = env.getOutputEncoding()
-      if (!encoding) {
-	def config = env.getConfiguration()
-	//encoding = config.getEncoding(null)
-	//if (!encoding) {
-	encoding = config.getDefaultEncoding()
-	//}
-      }
+      String encoding = getOutputEncoding(env)
       
       ByteArrayOutputStream output = new ByteArrayOutputStream()
       def writer = encoding ? new OutputStreamWriter(output, encoding) : new OutputStreamWriter(output)
       tagLib.setProperty(TagLibDynamicMethods.OUT_PROPERTY, writer);
       
       def params = arguments && arguments.size() > 0? arguments[0] : [:]
+      def body = arguments && arguments.size() > 1? arguments[1] : null
       def unwrappedParams = unwrapParams(params)
       
       if (log.isDebugEnabled()) {
-	log.debug("exec(): unwrappedParams " + unwrappedParams)
+	log.debug("exec(): unwrappedParams " + unwrappedParams + "; body " + body)
       }
 
-      def result = closure(unwrappedParams)
+      def result = null
+      if (!body) {
+	result = closure(unwrappedParams)
+      } else {
+	result = closure(unwrappedParams) {
+	  log.debug("execBody(): " + tagLibName + "." + tagName)
+	  body
+	}
+      }
       writer.close()
       output.close()
       
       log.debug("exec(): tag executed")
 
       def textResult = encoding? output.toString(encoding) : output.toString()
-      if (result && !(result instanceof String)) {
-	result = null
-      }
 
       if (log.isDebugEnabled()) {
 	log.debug("exec(): result " + result)
 	log.debug("exec(): textResult " + textResult)
       }
 
-      if (result) {
-	result = textResult + result
-      } else {
+      def returnsObject = doesReturnObject()
+      if (!returnsObject) {
 	result = textResult
       }
 
@@ -106,7 +104,7 @@ public class DynamicTagLibFunction extends BaseDynamicTagLibSupport implements T
       }
 
       def objectWrapper = env.getObjectWrapper()
-      return objectWrapper.wrap(result)
+      return objectWrapper.wrap(result? result: "")
     } catch (Exception e) {
       if (! (e instanceof TemplateException)) {
 	e = new TemplateModelException(e)

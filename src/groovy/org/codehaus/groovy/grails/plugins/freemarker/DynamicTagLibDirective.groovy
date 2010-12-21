@@ -86,19 +86,19 @@ public class DynamicTagLibDirective extends BaseDynamicTagLibSupport implements 
 	  } else {
 	    throw new TemplateException("missing body", env)
 	  }
+
+	  ""
 	}
       }
 
       log.debug("execute(): tag executed")
-      if (result && !(result instanceof String)) {
-	result = null
-      }
 
       if (log.isDebugEnabled()) {
 	log.debug("execute(): result " + result)
       }
 
-      if (result) {
+      def returnsObject = doesReturnObject()
+      if (returnsObject && result) {
 	env.getOut() << result
       }
     } catch (Exception e) {
