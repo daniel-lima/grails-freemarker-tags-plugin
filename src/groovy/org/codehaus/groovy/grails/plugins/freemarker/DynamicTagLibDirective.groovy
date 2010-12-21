@@ -80,14 +80,31 @@ public class DynamicTagLibDirective extends BaseDynamicTagLibSupport implements 
 	result = closure(unwrappedParams)
       } else {
 	result = closure(unwrappedParams) {
-	  log.debug("executeBody(): " + tagLibName + "." + tagName)
-	  if (body) {
-	    body.render(env.getOut())
-	  } else {
-	    throw new TemplateException("missing body", env)
-	  }
-
-	  ""
+	  it ->
+	    def oldItVariable = null
+	    def objectWrapper = null
+	    if (it) {
+	      objectWrapper = env.getObjectWrapper()
+	      oldItVariable = env.getVariable("it")
+	      env.setVariable("it", it?objectWrapper.wrap(it): null)
+	    }
+	    try {
+	      log.debug("executeBody(): " + tagLibName + "." + tagName)
+	      if (log.isDebugEnabled()) {
+		log.debug("executeBody(): it " + it)
+	      }
+	      if (body) {
+		body.render(env.getOut())
+	      } else {
+		throw new TemplateException("missing body", env)
+	      }
+	      
+	      ""
+	    } finally {
+	      if (it) {
+		env.setVariable("it", oldItVariable)
+	      }
+	    }
 	}
       }
 
