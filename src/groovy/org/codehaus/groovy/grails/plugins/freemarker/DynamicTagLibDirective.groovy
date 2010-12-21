@@ -74,11 +74,12 @@ public class DynamicTagLibDirective extends BaseDynamicTagLibSupport implements 
       if (log.isDebugEnabled()) {
 	log.debug("execute(): unwrappedParams " + unwrappedParams)
       }
-      
+
+      def result = null
       if (closure.getMaximumNumberOfParameters() == 1) {
-	closure(unwrappedParams)
+	result = closure(unwrappedParams)
       } else {
-	closure(unwrappedParams) {
+	result = closure(unwrappedParams) {
 	  log.debug("executeBody(): " + tagLibName + "." + tagName)
 	  if (body) {
 	    body.render(env.getOut())
@@ -87,13 +88,25 @@ public class DynamicTagLibDirective extends BaseDynamicTagLibSupport implements 
 	  }
 	}
       }
+
+      log.debug("execute(): tag executed")
+      if (result && !(result instanceof String)) {
+	result = null
+      }
+
+      if (log.isDebugEnabled()) {
+	log.debug("execute(): result " + result)
+      }
+
+      if (result) {
+	env.getOut() << result
+      }
     } catch (Exception e) {
       if (!(e instanceof TemplateException)) {
 	throw new TemplateModelException(e)
       }
     }
-
-    log.debug("execute(): tag executed")
+    
   }
 
 }

@@ -79,14 +79,34 @@ public class DynamicTagLibFunction extends BaseDynamicTagLibSupport implements T
 	log.debug("exec(): unwrappedParams " + unwrappedParams)
       }
 
-      closure(unwrappedParams)
+      def result = closure(unwrappedParams)
       writer.close()
+      output.close()
       
       log.debug("exec(): tag executed")
 
-      def objectWrapper = env.getObjectWrapper()
+      def textResult = encoding? output.toString(encoding) : output.toString()
+      if (result && !(result instanceof String)) {
+	result = null
+      }
 
-      return new StringModel(encoding? output.toString(encoding) : output.toString(), objectWrapper)
+      if (log.isDebugEnabled()) {
+	log.debug("exec(): result " + result)
+	log.debug("exec(): textResult " + textResult)
+      }
+
+      if (result) {
+	result = textResult + result
+      } else {
+	result = textResult
+      }
+
+      if (log.isDebugEnabled()) {
+	log.debug("exec(): result " + result)
+      }
+
+      def objectWrapper = env.getObjectWrapper()
+      return objectWrapper.wrap(result)
     } catch (Exception e) {
       if (! (e instanceof TemplateException)) {
 	e = new TemplateModelException(e)
