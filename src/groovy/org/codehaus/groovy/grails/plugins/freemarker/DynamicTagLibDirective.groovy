@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.web.metaclass.TagLibDynamicMethods
+//import org.codehaus.groovy.grails.web.util.StreamCharBuffer
 
 
 /**
@@ -67,6 +68,9 @@ public class DynamicTagLibDirective extends BaseDynamicTagLibSupport implements 
 	  "Could not find tag " + this.tagName);
       }
       
+      if (log.isDebugEnabled()) {
+	log.debug("execute(): out = " + env.getOut())
+      }
       tagLib.setProperty(TagLibDynamicMethods.OUT_PROPERTY, env.getOut());
       
       def unwrappedParams = unwrapParams(params)
@@ -93,17 +97,37 @@ public class DynamicTagLibDirective extends BaseDynamicTagLibSupport implements 
 	      if (log.isDebugEnabled()) {
 		log.debug("executeBody(): it " + it)
 	      }
+	      String nestedResult = null
 	      if (body) {
-		body.render(env.getOut())
-	      } else {
+		//StreamCharBuffer charBuffer = new StreamCharBuffer()
+		//def writer = charBuffer.getWriter()
+		String encoding = getOutputEncoding(env)
+		ByteArrayOutputStream nestedOut = new ByteArrayOutputStream()
+		def nestedWriter = encoding ? new OutputStreamWriter(nestedOut, encoding) : new OutputStreamWriter(nestedOut)
+		body.render(nestedWriter)
+		//writer.flush()
+		//return charBuffer
+
+		nestedWriter.close()
+		return encoding? nestedOut.toString(encoding) : nestedOut.toString()
+	      } /*else {
 		throw new TemplateException("missing body", env)
-	      }
+		}*/
 	      
-	      ""
+
+	      return ""
+	      //return charBuffer
 	    } finally {
 	      if (it) {
 		env.setVariable("it", oldItVariable)
 	      }
+	      
+	      // Restore the previous output
+	      if (log.isDebugEnabled()) {
+		log.debug("execute(): restored out = " + env.getOut())
+	      }
+	      tagLib.setProperty(TagLibDynamicMethods.OUT_PROPERTY, env.getOut());
+	      
 	    }
 	}
       }
