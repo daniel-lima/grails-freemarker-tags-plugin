@@ -26,3 +26,8 @@ log4j = {
 // The following properties have been added by the Upgrade process...
 grails.views.default.codec="none" // none, html, base64
 grails.views.gsp.encoding="UTF-8"
+
+
+grails.doc.authors='Daniel Henrique Alves Lima (text revised by Gislaine Fonseca Ribeiro and others)'
+grails.doc.license='Apache License 2.0'
+
