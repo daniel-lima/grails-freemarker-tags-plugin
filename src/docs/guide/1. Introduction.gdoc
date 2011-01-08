@@ -1,0 +1,4 @@
+This plugin exposes "Grails Dynamic Tag Libraries":http://www.grails.org/Dynamic+Tag+Libraries as macros (or directives) and functions to "FreeMarker template engine":http://freemarker.sourceforge.net/
+
+It enables the usage of Grails Tag Libs inside FreeMarker templates without any additional configuration.
+
