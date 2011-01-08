@@ -1,0 +1,19 @@
+GSP
+
+{code: xml}
+<g:includeJs script="myscript" />
+{code}
+
+
+FreeMarker template
+
+{code: xml}
+<@g.includeJs script="myscript" />
+{code}
+
+or 
+
+{code: xml}
+\[@g.includeJs script="myscript" /]
+{code}
+

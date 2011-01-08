@@ -1,0 +1,13 @@
+GSP
+
+{code: xml}
+\[key1: 'abc', key2: 2]
+{code}
+
+
+FreeMarker template
+
+{code: xml}
+{'key1': 'abc', 'key2': 2}
+{code}
+
