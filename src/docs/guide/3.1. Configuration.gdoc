@@ -1,5 +1,5 @@
 {code}
-application.config.grails.plugins.freemarkertags = [
+grails.plugins.freemarkertags = [
   autoImport: true,        /* To enable or to disable auto-import feature. When disabled the generated libraries can be imported using FreeMarker default mechanism.*/
   defineFunctions: true    /* To enable or to disable function declaration/definition feature. */
 ]

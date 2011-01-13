@@ -1,11 +1,11 @@
-GSP
+.gsp
 
 {code: xml}
 <g:includeJs script="myscript" />
 {code}
 
 
-FreeMarker template
+.ftl
 
 {code: xml}
 <@g.includeJs script="myscript" />

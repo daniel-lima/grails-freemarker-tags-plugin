@@ -1,13 +1,13 @@
 FreeMarker reserved words present in Grails Core TagLibs that can cause errors to FreeMarker's parser, will be preceded by '_' (underscore).
 
-GSP
+.gsp
 
 {code: xml}
 <g:renderErrors bean="${myUserInstance}" as="list" />
 {code}
 
 
-FreeMarker template
+.ftl
 
 {code: xml}
 <@g.renderErrors bean=myUserInstance _as="list" />

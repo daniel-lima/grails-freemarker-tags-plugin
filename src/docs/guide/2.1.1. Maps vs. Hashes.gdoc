@@ -1,11 +1,11 @@
-GSP
+.gsp
 
 {code: xml}
 \[key1: 'abc', key2: 2]
 {code}
 
 
-FreeMarker template
+.ftl
 
 {code: xml}
 {'key1': 'abc', 'key2': 2}

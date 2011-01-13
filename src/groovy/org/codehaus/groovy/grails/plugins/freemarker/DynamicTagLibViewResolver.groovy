@@ -81,7 +81,18 @@ public class DynamicTagLibViewResolver /*extends GrailsFreeMarkerViewResolver*/ 
     }  
 
     super.setPrefix(prefix)
-    helper = new AutoConfigHelper(prefix)
+    //helper = new AutoConfigHelper(prefix)
+  }
+
+
+  @Override
+  public void setSuffix(String suffix) {
+    if (log.isDebugEnabled()) {
+      log.debug("setSuffix(): suffix " + suffix)
+    }  
+
+    super.setSuffix(suffix)
+    helper = new AutoConfigHelper(suffix)
   }
 
 }

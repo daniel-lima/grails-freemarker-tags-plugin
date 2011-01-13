@@ -1,11 +1,11 @@
-GSP
+.gsp
 
 {code: xml}
 <span id="title" class="label ${hasErrors(bean:book,field:'title','errors')}">Title</span>
 {code}
 
 
-FreeMarker template
+.ftl
 
 {code: xml}
 <span id="title" class="label ${g._hasErrors({'bean':book,'field':'title'},'errors')}">Title</span>

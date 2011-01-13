@@ -1,11 +1,11 @@
-<plugin name='freemarker-tags' version='0.5.3' grailsVersion='1.3.3 &gt; *'>
+<plugin name='freemarker-tags' version='0.5.5' grailsVersion='1.3.3 &gt; *'>
   <author>Daniel Henrique Alves Lima</author>
   <authorEmail>email_daniel_h@yahoo.com.br</authorEmail>
   <title>Plugin to use Grails Dynamic Tag Libraries as Freemarker directives</title>
   <description>\
 Plugin to use Grails Dynamic Tag Libraries as Freemarker directives.
 </description>
-  <documentation>http://code.google.com/p/grails-freemarker-tags-plugin</documentation>
+  <documentation>http://grails.org/plugin/freemarker-tags</documentation>
   <resources>
     <resource>BuildConfig</resource>
     <resource>Config</resource>
