@@ -29,7 +29,8 @@ import org.springframework.grails.freemarker.GrailsFreeMarkerViewResolver
  */
 public class DynamicTagLibViewResolver /*extends GrailsFreeMarkerViewResolver*/ extends FreeMarkerViewResolver {
 
-  private static final Log log = LogFactory.getLog(getClass()) 
+  private final Log log = LogFactory.getLog(getClass())
+  private final Log errorLog = LogFactory.getLog(getClass().getName() + ".ERROR")
 
   private AutoConfigHelper helper = null
 
@@ -49,7 +50,7 @@ public class DynamicTagLibViewResolver /*extends GrailsFreeMarkerViewResolver*/ 
     } catch(e) {
       // return null if an exception occurs so the rest of the view
       // resolver chain gets an opportunity to  generate a View
-      log.warning("loadView()", e)
+      errorLog.debug("loadView()", e)
     }
 
     if (log.isDebugEnabled()) {

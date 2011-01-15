@@ -1,6 +1,6 @@
 class FreemarkerTagsGrailsPlugin {
     // the plugin version
-    def version = "0.5.5"
+    def version = "0.5.6"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.3 > *"
     // the other plugins this plugin depends on
@@ -14,9 +14,9 @@ class FreemarkerTagsGrailsPlugin {
     // TODO Fill in these fields
     def author = "Daniel Henrique Alves Lima"
     def authorEmail = "email_daniel_h@yahoo.com.br"
-    def title = "Plugin to use Grails Dynamic Tag Libraries as Freemarker directives"
+    def title = "Plugin to use Grails Dynamic Tag Libraries in FreeMarker templates"
     def description = '''\\
-Plugin to use Grails Dynamic Tag Libraries as Freemarker directives.
+Plugin to use Grails Dynamic Tag Libraries in FreeMarker templates.
 '''
 
     // URL to the plugin's documentation

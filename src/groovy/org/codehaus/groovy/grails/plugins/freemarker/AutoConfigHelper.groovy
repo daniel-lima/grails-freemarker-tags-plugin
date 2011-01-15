@@ -16,6 +16,7 @@
 package org.codehaus.groovy.grails.plugins.freemarker
 
 import freemarker.template.Configuration
+import freemarker.ext.beans.SimpleMapModel
 
 import freemarker.cache.MultiTemplateLoader
 import freemarker.cache.TemplateLoader
@@ -38,6 +39,7 @@ public class AutoConfigHelper {
   
   private final String ftlExtension
   private StringTemplateLoader stringLoader  = null
+  private Map sharedVariables = null
 
   public AutoConfigHelper() {
     this(".ftl")
@@ -60,65 +62,113 @@ public class AutoConfigHelper {
       def oldLoader = configuration.templateLoader
       def autoImport = [:]
       if (!stringLoader || reload) {
-	def lf = System.getProperty("line.separator")
-	
-	GrailsApplication application = ApplicationHolder.getApplication()
-	def grailsConfig = [
-	  autoImport: true,
-	  defineFunctions: true
-	]
-	def grailsReconfig = application.config.grails.plugins.freemarkertags
-	if (grailsReconfig instanceof ConfigObject) {
-	  grailsReconfig = grailsReconfig.toProperties()
-	}
-	if (log.isDebugEnabled()) {
-	  log.debug("autoConfigure(): grailsConfig " + grailsConfig)
-	  log.debug("autoConfigure(): grailsReconfig " + grailsReconfig)
-	}
-	grailsConfig.putAll(grailsReconfig)
-	if (log.isDebugEnabled()) {
-	  log.debug("autoConfigure(): grailsConfig " + grailsConfig)
-	}	
-
-	def templates = [:]
-	application.tagLibClasses.each {
-	  tagLibClass ->
-	    def template = templates.get(tagLibClass.namespace)
-	    if (!template) {
-	      template = new StringBuilder("[#ftl/]")
-	      template.append(lf)
-	      templates.put(tagLibClass.namespace, template)
+	synchronized (this) {
+	  def lf = System.getProperty("line.separator")
+	  
+	  GrailsApplication application = ApplicationHolder.getApplication()
+	  def grailsConfig = [
+	    autoImport: true,
+	    defineFunctions: true,
+	    asSharedVariables: false
+	  ]
+	  def grailsReconfig = application.config.grails.plugins.freemarkertags
+	  if (grailsReconfig instanceof ConfigObject) {
+	    grailsReconfig = grailsReconfig.toProperties()
+	  }
+	  if (log.isDebugEnabled()) {
+	    log.debug("autoConfigure(): grailsConfig " + grailsConfig)
+	    log.debug("autoConfigure(): grailsReconfig " + grailsReconfig)
+	  }
+	  grailsConfig.putAll(grailsReconfig)
+	  if (log.isDebugEnabled()) {
+	    log.debug("autoConfigure(): grailsConfig " + grailsConfig)
+	  }	
+	  
+	  if (grailsConfig.autoImport && grailsConfig.asSharedVariables) {
+	    throw new RuntimeException("autoImport should be false when asSharedVariables is true");
+	  }
+	  
+	  def dynamicDirectiveConstructor = null
+	  def dynamicFunctionConstructor = null
+	  
+	  if (grailsConfig.asSharedVariables) {
+	    def cl = Thread.currentThread().contextClassLoader
+	    dynamicDirectiveConstructor = cl.loadClass(dynamicDirectiveClassName).getConstructor([String, String] as Class[])
+	    dynamicFunctionConstructor = cl.loadClass(dynamicFunctionClassName).getConstructor([String, String] as Class[])
+	  }
+	  
+	  def templates = [:]
+	  if (grailsConfig.asSharedVariables) {
+	    sharedVariables = [:]
+	  }
+	  application.tagLibClasses.each {
+	    tagLibClass ->
+	      def template = templates.get(tagLibClass.namespace)
+	      if (!template) {
+		template = new StringBuilder("[#ftl/]")
+		template.append(lf)
+		templates.put(tagLibClass.namespace, template)
+	      }
+	      
+	      def sharedVar = null
+	      if (sharedVariables != null) {
+		sharedVar = sharedVariables[tagLibClass.namespace]
+		if (sharedVar == null) {
+		  sharedVar = [:]
+		  sharedVariables.put(tagLibClass.namespace, sharedVar)
+		}
+	      }
+	      
+	      tagLibClass.tagNames.each {
+		tagName ->
+		  template.append('[#assign ' + tagName + ' =' +
+				  '"' + dynamicDirectiveClassName + '"?new("' + tagLibClass.namespace + '", "' + tagName + '")]')
+		  template.append(lf)
+		  
+		  if (sharedVar != null) {
+		    sharedVar[tagName] = dynamicDirectiveConstructor.newInstance(tagLibClass.namespace, tagName)
+		  }
+		  
+		  if (grailsConfig.defineFunctions) {
+		    template.append('[#assign _' + tagName + ' =' +
+				    '"' + dynamicFunctionClassName + '"?new("' + tagLibClass.namespace + '", "' + tagName + '")]')
+		    template.append(lf)
+		    
+		    if (sharedVar != null) {
+		      sharedVar["_" + tagName] = dynamicFunctionConstructor.newInstance(tagLibClass.namespace, tagName)
+		    }
+		  }
+	      }
+	  }
+	  
+	  stringLoader = new StringTemplateLoader()
+	  templates.each {
+	    def key = /*"/" +*/ it.key + this.ftlExtension
+	    def value = it.value.toString()
+	    if (log.isDebugEnabled()) {
+	      log.debug("autoConfigure(): template " + key)
+	      log.debug("autoConfigure():          " + value)
 	    }
 	    
-	    tagLibClass.tagNames.each {
-	      tagName ->
-	      template.append('[#assign ' + tagName + ' =' +
-			      '"' + dynamicDirectiveClassName + '"?new("' + tagLibClass.namespace + '", "' + tagName + '")]')
-	      template.append(lf)
-	      if (grailsConfig.defineFunctions) {
-		template.append('[#assign _' + tagName + ' =' +
-				'"' + dynamicFunctionClassName + '"?new("' + tagLibClass.namespace + '", "' + tagName + '")]')
-		template.append(lf)
-	      }
+	    stringLoader.putTemplate(key, value)
+	    if (grailsConfig.autoImport) {
+	      autoImport.put(it.key, key)
 	    }
-	}
-	
-	stringLoader = new StringTemplateLoader()
-	templates.each {
-	  def key = /*"/" +*/ it.key + this.ftlExtension
-	  def value = it.value.toString()
+	  }
+	  
+	  templates = null
+	  
 	  if (log.isDebugEnabled()) {
-	    log.debug("autoConfigure(): template " + key)
-	    log.debug("autoConfigure():          " + value)
+	    log.debug("autoConfigure(): sharedVariables " + (sharedVariables != null? sharedVariables.keySet(): null))
 	  }
-
-	  stringLoader.putTemplate(key, value)
-	  if (grailsConfig.autoImport) {
-	    autoImport.put(it.key, key)
+	  if (sharedVariables != null) {
+	    sharedVariables.entrySet().each {
+	      entry ->
+		log.debug("autoConfigure(): entry.key " + entry.key)
+		entry.value = new SimpleMapModel(entry.value, null)
+	    }
 	  }
 	}
-
-	templates = null
       }
       
       def loaders = [stringLoader, oldLoader]
@@ -137,6 +187,25 @@ public class AutoConfigHelper {
 	  log.debug("autoConfigure(): autoImporting " + it.key + " " + it.value)
 	}
 	configuration.addAutoImport(it.key, it.value)
+      }
+
+      if (log.isDebugEnabled()) {
+	log.debug("autoConfigure(): sharedVariables " + sharedVariables)
+      }
+      if (sharedVariables != null) {
+	def replacedSharedVars = new HashSet();
+	sharedVariables.entrySet().each {
+	  entry ->
+	    def sharedVar = configuration.getSharedVariable(entry.key)
+	    if (sharedVar != entry.value) {	      
+	      replacedSharedVars << entry.key
+	      configuration.setSharedVariable(entry.key, entry.value)
+	    }
+	}
+
+	if (log.isDebugEnabled()) {
+	  log.debug("autoConfigure(): replacedSharedVars " + replacedSharedVars)
+	}
       }
     }
 

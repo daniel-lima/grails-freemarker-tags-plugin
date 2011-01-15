@@ -169,7 +169,7 @@ public class BaseDynamicTagLibSupport {
   private Map<String, GroovyObject> getTagLibsCache(Environment env) {
     def cache = env.getVariable(TAG_LIBS_VARIABLE)
     if (!cache) {
-      cache = new SimpleMapModel(new HashMap<String, GroovyObject>(), null)
+      cache = new SimpleMapModel(Collections.synchronizedMap(new HashMap<String, GroovyObject>()), null)
       env.setVariable(TAG_LIBS_VARIABLE, cache)
     }
     cache = cache.getWrappedObject()
