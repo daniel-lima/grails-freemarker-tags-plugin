@@ -29,6 +29,8 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsTagLibClass
 import org.codehaus.groovy.grails.commons.TagLibArtefactHandler
+import org.codehaus.groovy.grails.web.pages.GroovyPageOutputStack
+
 
 /**
  * @author Daniel Henrique Alves Lima
@@ -116,6 +118,19 @@ public class BaseDynamicTagLibSupport {
   }
 
 
+  protected void logCurrentOutput() {
+    if (log.isDebugEnabled()) {
+      log.debug("logCurrentOutput(): currentOriginalWriter " + GroovyPageOutputStack.currentStack().getCurrentOriginalWriter())
+    }
+  }
+
+  protected void restoreOutput() {
+    log.debug("restoreOutput()")
+    logCurrentOutput()
+    GroovyPageOutputStack.currentStack().pop()
+    logCurrentOutput()
+  }
+
   protected boolean doesReturnObject() {
     GrailsTagLibClass tagLibClass = getDynamicTagLibClass()
     def tagNamesThatReturnObject = tagLibClass.getTagNamesThatReturnObject()
@@ -139,11 +154,15 @@ public class BaseDynamicTagLibSupport {
     }
     if (tagLibClass) {
       def tagLibFullName = tagLibClass.getFullName()
-      log.debug("getDynamicTagLib(): tagLibFullName " + tagLibFullName)
+      if (log.isDebugEnabled()) {
+	log.debug("getDynamicTagLib(): tagLibFullName " + tagLibFullName)
+      }
       if (tagLibs.containsKey(tagLibFullName)) {
+	log.debug("getDynamicTagLib(): hit")
 	tagLib = (GroovyObject) tagLibs.get(tagLibFullName)
       }
       else {
+	log.debug("getDynamicTagLib(): miss")
 	tagLib = (GroovyObject) appContext.getBean(tagLibFullName)
 	tagLibs.put(tagLibFullName, tagLib)
       }

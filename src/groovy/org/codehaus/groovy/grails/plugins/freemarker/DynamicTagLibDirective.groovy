@@ -55,6 +55,7 @@ public class DynamicTagLibDirective extends BaseDynamicTagLibSupport implements 
       log.debug("execute(): " + tagLibName + "." + tagName)      
       log.debug("execute(): env=" + env + "; params=" + params + "; body=" + body)
     }
+    boolean restoreOut = false
     try {
       def tagLib = getDynamicTagLib(env)
       if (!tagLib) {
@@ -68,10 +69,14 @@ public class DynamicTagLibDirective extends BaseDynamicTagLibSupport implements 
 	  "Could not find tag " + this.tagName);
       }
       
+      logCurrentOutput()
       if (log.isDebugEnabled()) {
 	log.debug("execute(): out = " + env.getOut())
       }
       tagLib.setProperty(TagLibDynamicMethods.OUT_PROPERTY, env.getOut());
+      //tagLib.out = env.getOut()
+      restoreOut = true
+      logCurrentOutput()
       
       def unwrappedParams = unwrapParams(params)
       
@@ -123,10 +128,14 @@ public class DynamicTagLibDirective extends BaseDynamicTagLibSupport implements 
 	      }
 	      
 	      // Restore the previous output
-	      if (log.isDebugEnabled()) {
-		log.debug("execute(): restored out = " + env.getOut())
-	      }
-	      tagLib.setProperty(TagLibDynamicMethods.OUT_PROPERTY, env.getOut());
+	      //if (log.isDebugEnabled()) {
+	      //	log.debug("execute(): restored out = " + env.getOut())
+	      //}
+	      //tagLib.setProperty(TagLibDynamicMethods.OUT_PROPERTY, env.getOut());
+	      //tagLib.out = env.getOut()
+	      /*if (restoreOut) {
+		restoreOutput()
+		}*/
 	      
 	    }
 	}
@@ -145,6 +154,10 @@ public class DynamicTagLibDirective extends BaseDynamicTagLibSupport implements 
     } catch (Exception e) {
       if (!(e instanceof TemplateException)) {
 	throw new TemplateModelException(e)
+      }
+    } finally {
+      if (restoreOut) {
+	restoreOutput()
       }
     }
     

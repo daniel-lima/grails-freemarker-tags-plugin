@@ -40,6 +40,7 @@ public class DynamicTagLibFunction extends BaseDynamicTagLibSupport implements T
 
   public Object exec(List arguments) throws TemplateModelException {
     def env = Environment.getCurrentEnvironment()
+    boolean restoreOut = false
     try {
       
       if (log.isDebugEnabled()) {
@@ -63,7 +64,14 @@ public class DynamicTagLibFunction extends BaseDynamicTagLibSupport implements T
       
       ByteArrayOutputStream output = new ByteArrayOutputStream()
       def writer = encoding ? new OutputStreamWriter(output, encoding) : new OutputStreamWriter(output)
+      logCurrentOutput()
+      if (log.isDebugEnabled()) {
+	log.debug("exec(): writer " + writer)
+      }
       tagLib.setProperty(TagLibDynamicMethods.OUT_PROPERTY, writer);
+      logCurrentOutput()
+      //tagLib.out = writer
+      restoreOut = true
       
       def params = arguments && arguments.size() > 0? arguments[0] : [:]
       def body = arguments && arguments.size() > 1? arguments[1] : null
@@ -110,6 +118,10 @@ public class DynamicTagLibFunction extends BaseDynamicTagLibSupport implements T
 	e = new TemplateModelException(e)
       }
       throw e
+    } finally {
+      if (restoreOut) {
+	restoreOutput()
+      }
     }
   }
 
