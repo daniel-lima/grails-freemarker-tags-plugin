@@ -57,8 +57,8 @@ public class AutoConfigHelper {
       log.debug("autoConfigure(): reload " + reload + ", configuration " + configuration)
     }
     if (configuration) {
-      String dynamicDirectiveClassName = DynamicTagLibDirective.class.getName()
-      String dynamicFunctionClassName = DynamicTagLibFunction.class.getName()
+      String dynamicDirectiveClassName = null
+      String dynamicFunctionClassName = null
       def oldLoader = configuration.templateLoader
       def autoImport = [:]
       if (!stringLoader || reload) {
@@ -68,7 +68,7 @@ public class AutoConfigHelper {
 	  GrailsApplication application = ApplicationHolder.getApplication()
 	  def grailsConfig = [
 	    autoImport: true,
-	    defineFunctions: true,
+	    defineLegacyFunctions: false,
 	    asSharedVariables: false
 	  ]
 	  def grailsReconfig = application.config.grails.plugins.freemarkertags
@@ -87,6 +87,13 @@ public class AutoConfigHelper {
 	  if (grailsConfig.autoImport && grailsConfig.asSharedVariables) {
 	    throw new RuntimeException("autoImport should be false when asSharedVariables is true");
 	  }
+
+	  if (grailsConfig.defineLegacyFunctions) {
+	    dynamicDirectiveClassName = DynamicTagLibDirective.class.getName()  
+	    dynamicFunctionClassName = DynamicTagLibFunction.class.getName()
+	  } else {
+	    dynamicDirectiveClassName = DynamicTagLibDirectiveAndFunction.class.getName()
+	  }
 	  
 	  def dynamicDirectiveConstructor = null
 	  def dynamicFunctionConstructor = null
@@ -94,7 +101,9 @@ public class AutoConfigHelper {
 	  if (grailsConfig.asSharedVariables) {
 	    def cl = Thread.currentThread().contextClassLoader
 	    dynamicDirectiveConstructor = cl.loadClass(dynamicDirectiveClassName).getConstructor([String, String] as Class[])
-	    dynamicFunctionConstructor = cl.loadClass(dynamicFunctionClassName).getConstructor([String, String] as Class[])
+	    if (grailsConfig.defineLegacyFunctions) {
+	      dynamicFunctionConstructor = cl.loadClass(dynamicFunctionClassName).getConstructor([String, String] as Class[])
+	    }
 	  }
 	  
 	  def templates = [:]
@@ -129,7 +138,7 @@ public class AutoConfigHelper {
 		    sharedVar[tagName] = dynamicDirectiveConstructor.newInstance(tagLibClass.namespace, tagName)
 		  }
 		  
-		  if (grailsConfig.defineFunctions) {
+		  if (grailsConfig.defineLegacyFunctions) {
 		    template.append('[#assign _' + tagName + ' =' +
 				    '"' + dynamicFunctionClassName + '"?new("' + tagLibClass.namespace + '", "' + tagName + '")]')
 		    template.append(lf)

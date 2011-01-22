@@ -147,7 +147,7 @@ public class DynamicTagLibDirective extends BaseDynamicTagLibSupport implements 
 	log.debug("execute(): result " + result)
       }
 
-      def returnsObject = doesReturnObject()
+      def returnsObject = doesReturnObject(env)
       if (returnsObject && result) {
 	env.getOut() << result
       }

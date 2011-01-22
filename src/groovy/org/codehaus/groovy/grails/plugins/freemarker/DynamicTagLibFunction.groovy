@@ -102,7 +102,7 @@ public class DynamicTagLibFunction extends BaseDynamicTagLibSupport implements T
 	log.debug("exec(): textResult " + textResult)
       }
 
-      def returnsObject = doesReturnObject()
+      def returnsObject = doesReturnObject(env)
       if (!returnsObject) {
 	result = textResult
       }

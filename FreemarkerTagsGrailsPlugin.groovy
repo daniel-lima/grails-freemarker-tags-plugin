@@ -1,6 +1,6 @@
 class FreemarkerTagsGrailsPlugin {
     // the plugin version
-    def version = "0.5.7"
+    def version = "0.5.8"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.3 > *"
     // the other plugins this plugin depends on
