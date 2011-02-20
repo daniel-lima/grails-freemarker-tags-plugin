@@ -22,6 +22,8 @@ import freemarker.cache.MultiTemplateLoader
 import freemarker.cache.TemplateLoader
 import freemarker.cache.StringTemplateLoader
 
+import grails.util.Environment
+
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -40,6 +42,7 @@ public class AutoConfigHelper {
   private final String ftlExtension
   private StringTemplateLoader stringLoader  = null
   private Map sharedVariables = null
+  private ConfigObject grailsConfig
 
   public AutoConfigHelper() {
     this(".ftl")
@@ -66,24 +69,11 @@ public class AutoConfigHelper {
 	  def lf = System.getProperty("line.separator")
 	  
 	  GrailsApplication application = ApplicationHolder.getApplication()
-	  def grailsConfig = [
-	    autoImport: true,
-	    defineLegacyFunctions: false,
-	    asSharedVariables: false
-	  ]
-	  def grailsReconfig = application.config.grails.plugins.freemarkertags
-	  if (grailsReconfig instanceof ConfigObject) {
-	    grailsReconfig = grailsReconfig.toProperties()
-	  }
+	  def grailsConfig = mergeConfig(application)
+	  this.grailsConfig = grailsConfig
 	  if (log.isDebugEnabled()) {
 	    log.debug("autoConfigure(): grailsConfig " + grailsConfig)
-	    log.debug("autoConfigure(): grailsReconfig " + grailsReconfig)
-	  }
-	  grailsConfig.putAll(grailsReconfig)
-	  if (log.isDebugEnabled()) {
-	    log.debug("autoConfigure(): grailsConfig " + grailsConfig)
-	  }	
-	  
+	  }	  
 	  if (grailsConfig.autoImport && grailsConfig.asSharedVariables) {
 	    throw new RuntimeException("autoImport should be false when asSharedVariables is true");
 	  }
@@ -222,4 +212,35 @@ public class AutoConfigHelper {
   }
 
 
+  protected ConfigObject mergeConfig(application) {
+    def customConfig = application.config.grails.plugins.freemarkertags
+    if (!customConfig) {
+      customConfig = application.config['grails.plugins.freemarkertags']
+    }
+    
+    if (customConfig) {
+      if (customConfig instanceof Map && !(customConfig instanceof ConfigObject)) {
+	ConfigObject c = new ConfigObject()
+	c.putAll(customConfig)
+	customConfig = c
+      }
+    } 
+
+    ConfigObject defaultConfig = loadDefaultConfig(application)
+    
+    def mergedConfig = defaultConfig.merge(customConfig)
+    customConfig.putAll(mergedConfig)
+    
+    return customConfig
+  }
+  
+  
+  protected ConfigObject loadDefaultConfig(application) {
+    def config = new ConfigSlurper(Environment.current.name).parse(application.classLoader.loadClass("FreemarkerTagsDefaultConfig"))
+    return config.freemarkertags
+  } 
+
+  public ConfigObject getGrailsConfig() {
+    return grailsConfig
+  }
 }

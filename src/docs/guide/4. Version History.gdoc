@@ -2,3 +2,7 @@
 ** Fixed GroovyPageOutputStack usage
 ** Functions names are no longer prefixed by "_"
 ** Added EXPERIMENTAL support to expose functions and directives as shared variables
+
+* 0.5.9
+** Required version of Grails was reduced from 1.3.3 to 1.2
+** Exceptions thrown during the execution of FreeMarkerViewResolver.loadView() are no longer hidden

@@ -48,9 +48,20 @@ public class DynamicTagLibViewResolver /*extends GrailsFreeMarkerViewResolver*/ 
     try {
       view = super.loadView(viewName, locale)
     } catch(e) {
-      // return null if an exception occurs so the rest of the view
-      // resolver chain gets an opportunity to  generate a View
-      errorLog.debug("loadView()", e)
+      boolean hideException = false
+      try {
+	hideException = helper && helper.grailsConfig.viewResolver.legacyHideExceptions
+      } catch (Exception ne) {
+      }
+
+      if (hideException) {
+	// return null if an exception occurs so the rest of the view
+	// resolver chain gets an opportunity to  generate a View
+	errorLog.debug("loadView()", e)
+      } else {
+	errorLog.error("loadView()", e)
+	throw e
+      }
     }
 
     if (log.isDebugEnabled()) {
