@@ -15,7 +15,7 @@
  */
 class FreemarkerTagsGrailsPlugin {
     // the plugin version
-    def version = "0.5.9"
+    def version = "0.6.0"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2.5 > *"
     // the other plugins this plugin depends on
@@ -46,11 +46,23 @@ Plugin to use Grails Dynamic Tag Libraries in FreeMarker templates.
       mergeConfig(application)
 
       // Redefinition
-      freemarkerViewResolver(org.codehaus.groovy.grails.plugins.freemarker.DynamicTagLibViewResolver) {
+      /*freemarkerViewResolver(org.codehaus.groovy.grails.plugins.freemarker.DynamicTagLibViewResolver) {
 	prefix = ''
 	suffix = '.ftl'
 	order = 10
-      }
+      }*/
+ 
+      def viewResolverBeanDef = delegate.getBeanDefinition("freemarkerViewResolver")
+      def viewResolverPropValues = viewResolverBeanDef.propertyValues
+      def suffixPropValue = viewResolverPropValues.getPropertyValue("suffix")
+      
+      viewResolverBeanDef.beanClass = org.codehaus.groovy.grails.plugins.freemarker.DynamicTagLibViewResolver
+
+      def configBeanDef = delegate.getBeanDefinition("freemarkerConfig")
+      def configPropValues = configBeanDef.propertyValues
+      suffixPropValue = new org.springframework.beans.PropertyValue(suffixPropValue)
+      configPropValues.addPropertyValue(suffixPropValue)
+      configBeanDef.beanClass = org.codehaus.groovy.grails.plugins.freemarker.DynamicTagLibConfigurer
     }
 
     def doWithDynamicMethods = { ctx ->

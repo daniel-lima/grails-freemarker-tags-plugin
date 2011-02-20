@@ -6,3 +6,6 @@
 * 0.5.9
 ** Required version of Grails was reduced from 1.3.3 to 1.2.5
 ** Exceptions thrown during the execution of FreeMarkerViewResolver.loadView() are no longer hidden
+
+* 0.6.0
+** Added specialized subclass of FreeMarkerConfigurer, increasing the range of use cases of the plugin

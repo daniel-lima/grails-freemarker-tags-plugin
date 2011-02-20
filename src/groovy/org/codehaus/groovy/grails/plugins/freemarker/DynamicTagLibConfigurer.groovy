@@ -15,39 +15,49 @@
  */
 package org.codehaus.groovy.grails.plugins.freemarker
 
-import org.springframework.grails.freemarker.GrailsFreeMarkerView
 import freemarker.template.Configuration
-
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer
+
 /**
  * @author Daniel Henrique Alves Lima
  */
-public class DynamicTagLibView extends GrailsFreeMarkerView {
+class DynamicTagLibConfigurer extends FreeMarkerConfigurer {
 
   private final Log log = LogFactory.getLog(getClass())
 
-  public DynamicTagLibView() {
-    log.debug("constructor()")
-  }
+  private String suffix = null
+
+  private AutoConfigHelper helper = null
 
   @Override
   public void setConfiguration(Configuration configuration) {
     if (log.isDebugEnabled()) {
       log.debug("setConfiguration(): configuration " + configuration)
     }
-
-    Boolean isConfigured = configuration.getCustomAttribute(AutoConfigHelper.CONFIGURED_ATTRIBUTE_NAME)
-    if (!isConfigured) {
-      def message = "FreeMarker Tags configuration is missing: A " + DynamicTagLibConfigurer.class.simpleName + 
-      " bean should be defined or " + AutoConfigHelper.class.simpleName + ".autoConfigure() should be called manually."
-      log.error("setConfiguration(): " + message)
-      throw new RuntimeException(message)
-    }
-
+    this.helper.autoConfigure(false, configuration)
     super.setConfiguration(configuration)
+  }
+
+  @Override
+  public Configuration getConfiguration() {
+    Configuration configuration = super.getConfiguration()
+    if (log.isDebugEnabled()) {
+      log.debug("getConfiguration(): configuration " + configuration)
+    }
+    this.helper.autoConfigure(false, configuration)
+    return configuration
+  }
+  
+  public void setSuffix(String suffix) {
+    if (log.isDebugEnabled()) {
+      log.debug("setSuffix(): suffix " + suffix)
+    }    
+    this.suffix = suffix
+    this.helper = new AutoConfigHelper(suffix)
   }
 
 }

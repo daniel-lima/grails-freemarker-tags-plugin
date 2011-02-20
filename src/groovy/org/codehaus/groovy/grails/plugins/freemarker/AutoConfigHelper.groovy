@@ -37,6 +37,8 @@ public class AutoConfigHelper {
 
   //public static final String GRAILS_CONFIG_NAMESPACE = "grails.plugins.freemarkertags"
 
+  public static final String CONFIGURED_ATTRIBUTE_NAME = "_" + AutoConfigHelper.class.getName() + ".configured"
+
   private final Log log = LogFactory.getLog(getClass())
   
   private final String ftlExtension
@@ -170,41 +172,50 @@ public class AutoConfigHelper {
 	}
       }
       
-      def loaders = [stringLoader, oldLoader]
+      Boolean isConfigured = configuration.getCustomAttribute(CONFIGURED_ATTRIBUTE_NAME)
       if (log.isDebugEnabled()) {
-	log.debug("autoConfigure(): loaders " + loaders)
+	log.debug("autoConfigure(): isConfigured " + isConfigured)
       }
 
-      def loader = new MultiTemplateLoader(loaders as TemplateLoader[])
-      configuration.setTemplateLoader(loader)
-      if (log.isDebugEnabled()) {
-	log.debug("autoConfigure(): loader " + loader)
-      }
-
-      autoImport.each {
+      if (!isConfigured || reload) {
+	def loaders = [stringLoader, oldLoader]
 	if (log.isDebugEnabled()) {
-	  log.debug("autoConfigure(): autoImporting " + it.key + " " + it.value)
+	  log.debug("autoConfigure(): loaders " + loaders)
 	}
-	configuration.addAutoImport(it.key, it.value)
-      }
-
-      if (log.isDebugEnabled()) {
-	log.debug("autoConfigure(): sharedVariables " + sharedVariables)
-      }
-      if (sharedVariables != null) {
-	def replacedSharedVars = new HashSet();
-	sharedVariables.entrySet().each {
-	  entry ->
-	    def sharedVar = configuration.getSharedVariable(entry.key)
-	    if (sharedVar != entry.value) {	      
-	      replacedSharedVars << entry.key
-	      configuration.setSharedVariable(entry.key, entry.value)
-	    }
-	}
-
+	
+	def loader = new MultiTemplateLoader(loaders as TemplateLoader[])
+	configuration.setTemplateLoader(loader)
 	if (log.isDebugEnabled()) {
-	  log.debug("autoConfigure(): replacedSharedVars " + replacedSharedVars)
+	  log.debug("autoConfigure(): loader " + loader)
 	}
+	
+	autoImport.each {
+	  if (log.isDebugEnabled()) {
+	    log.debug("autoConfigure(): autoImporting " + it.key + " " + it.value)
+	  }
+	  configuration.addAutoImport(it.key, it.value)
+	}
+	
+	if (log.isDebugEnabled()) {
+	  log.debug("autoConfigure(): sharedVariables " + sharedVariables)
+	}
+	if (sharedVariables != null) {
+	  def replacedSharedVars = new HashSet();
+	  sharedVariables.entrySet().each {
+	    entry ->
+	      def sharedVar = configuration.getSharedVariable(entry.key)
+	      if (sharedVar != entry.value) {	      
+		replacedSharedVars << entry.key
+		configuration.setSharedVariable(entry.key, entry.value)
+	      }
+	  }
+	  
+	  if (log.isDebugEnabled()) {
+	    log.debug("autoConfigure(): replacedSharedVars " + replacedSharedVars)
+	  }
+	}
+
+	configuration.setCustomAttribute(CONFIGURED_ATTRIBUTE_NAME, Boolean.TRUE)
       }
     }
 
