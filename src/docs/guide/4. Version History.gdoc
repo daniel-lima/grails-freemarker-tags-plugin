@@ -8,4 +8,4 @@
 ** Exceptions thrown during the execution of FreeMarkerViewResolver.loadView() are no longer hidden
 
 * 0.6.0
-** Added specialized subclass of FreeMarkerConfigurer, increasing the range of use cases of the plugin
+** Added specialized subclass of FreeMarkerConfigurer, increasing the range of use cases for the plugin
