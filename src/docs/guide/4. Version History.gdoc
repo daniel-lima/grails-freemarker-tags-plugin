@@ -11,5 +11,5 @@
 ** Added specialized subclass of FreeMarkerConfigurer, increasing the range of use cases for the plugin
 
 * 0.6.1
-** Fixed atts subclass (LinkedHashMap replaced by GroovyPageAttributes)
-** Fixed method calls to closures with a body parameter
+** Modified atts subclass (LinkedHashMap changed to GroovyPageAttributes)
+** Fixed calls to closures with an additional parameter (body)
