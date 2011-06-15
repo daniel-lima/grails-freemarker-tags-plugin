@@ -30,6 +30,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsTagLibClass
 import org.codehaus.groovy.grails.commons.TagLibArtefactHandler
 import org.codehaus.groovy.grails.web.pages.GroovyPageOutputStack
+import org.codehaus.groovy.grails.web.taglib.GroovyPageAttributes
 
 
 /**
@@ -70,7 +71,7 @@ public class BaseDynamicTagLibSupport {
   }
 
   protected Map unwrapParams(TemplateHashModelEx params, boolean translateReservedWords = true) {
-    Map unwrappedParams = new LinkedHashMap()
+    Map unwrappedParams = new GroovyPageAttributes(new LinkedHashMap())
 
     def keys = params.keys().iterator()
     while (keys.hasNext()) {
@@ -96,7 +97,7 @@ public class BaseDynamicTagLibSupport {
 
 
   protected Map unwrapParams(Map params, boolean translateReservedWords = true) {
-    def unwrappedParams = new LinkedHashMap()
+    def unwrappedParams = new GroovyPageAttributes(new LinkedHashMap())
 
     params.each {
       def value = it.value

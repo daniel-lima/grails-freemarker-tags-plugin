@@ -82,12 +82,14 @@ public class DynamicTagLibFunction extends BaseDynamicTagLibSupport implements T
       }
 
       def result = null
-      if (!body) {
+      if (closure.getMaximumNumberOfParameters() == 1 && !body) {
 	result = closure(unwrappedParams)
       } else {
 	result = closure(unwrappedParams) {
-	  log.debug("execBody(): " + tagLibName + "." + tagName)
-	  body
+          if (body) {
+	    log.debug("execBody(): " + tagLibName + "." + tagName)
+	    body
+          }
 	}
       }
       writer.close()
