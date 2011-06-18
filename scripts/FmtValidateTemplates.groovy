@@ -22,7 +22,7 @@ import grails.util.GrailsUtil
 
 includeTargets << grailsScript('_GrailsBootstrap')
 
-target(default: 'Parses all FreeMarker templates to check their syntax') {
+target(default: 'Parses all FreeMarker templates to validate their syntax') {
     depends checkVersion, configureProxy, bootstrap
 
     def springCtx = grailsApp.mainContext
