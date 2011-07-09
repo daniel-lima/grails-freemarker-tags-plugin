@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.codehaus.groovy.grails.plugins.freemarker.TagLibPostProcessor
+
+ 
 class FreemarkerTagsGrailsPlugin {
     // the plugin version
     def version = "0.6.2"
@@ -43,6 +46,7 @@ Plugin to use Grails Tag Libraries in FreeMarker templates.
     }
 
     def doWithSpring = {
+        println 'doWithSpring'
       mergeConfig(application)
 
       // Redefinition
@@ -63,10 +67,24 @@ Plugin to use Grails Tag Libraries in FreeMarker templates.
       suffixPropValue = new org.springframework.beans.PropertyValue(suffixPropValue)
       configPropValues.addPropertyValue(suffixPropValue)
       configBeanDef.beanClass = org.codehaus.groovy.grails.plugins.freemarker.DynamicTagLibConfigurer
+      
+      // Now go through tag libraries and configure them in spring too. With AOP proxies and so on
+      for (taglib in application.tagLibClasses) {
+          "${taglib.fullName}_fm"(taglib.clazz) { bean ->
+              bean.autowire = true
+              bean.lazyInit = true
+              // Taglib scoping support could be easily added here. Scope could be based on a static field in the taglib class.
+              //bean.scope = 'request'
+          }
+      }
+      
+      "${TagLibPostProcessor.class.name}"(TagLibPostProcessor) {
+          grailsApplication = ref('grailsApplication')
+      }
     }
 
     def doWithDynamicMethods = { ctx ->
-        // TODO Implement registering dynamic methods to classes (optional)
+        // TODO
     }
 
     def doWithApplicationContext = { applicationContext ->
