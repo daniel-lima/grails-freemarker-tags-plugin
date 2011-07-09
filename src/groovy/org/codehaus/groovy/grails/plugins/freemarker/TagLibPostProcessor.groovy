@@ -18,9 +18,30 @@ class TagLibPostProcessor extends InstantiationAwareBeanPostProcessorAdapter imp
         ArtefactHandler tagLibHandler = grailsApplication.getArtefactHandler(TagLibArtefactHandler.TYPE)
         if (tagLibHandler.isArtefact(bean.class) && beanName.endsWith('_fm')) {
             
+            ThreadLocal<Deque> outStack = new ThreadLocal<Deque>()
+            def _getX = {
+                Deque<Object> d = outStack.get()
+                if (d == null) {
+                    d = new LinkedList<Object>()
+                    outStack.set(d)
+                }
+                
+                return d
+            }
+            
+            
             MetaClass mc = bean.metaClass
             mc.getOut = {->
-                return System.out
+                Deque d = _getX()
+                return (d.size() > 0)?d.last : null
+            }
+            
+            mc.popOut = {->
+                return _getX().removeLast()
+            }
+            
+            mc.pushOut = {out ->
+                _getX().addLast(out) 
             }
             
             

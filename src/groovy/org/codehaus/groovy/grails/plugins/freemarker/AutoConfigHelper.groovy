@@ -37,7 +37,7 @@ public class AutoConfigHelper {
 
   //public static final String GRAILS_CONFIG_NAMESPACE = "grails.plugins.freemarkertags"
 
-  public static final String CONFIGURED_ATTRIBUTE_NAME = "_" + AutoConfigHelper.class.getName() + ".configured"
+  //public static final String CONFIGURED_ATTRIBUTE_NAME = "_" + AutoConfigHelper.class.getName() + ".configured"
 
   private final Log log = LogFactory.getLog(getClass())
   

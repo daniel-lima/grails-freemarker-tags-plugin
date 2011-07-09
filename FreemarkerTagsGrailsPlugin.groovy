@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.codehaus.groovy.grails.commons.GrailsClass
+import org.codehaus.groovy.grails.commons.TagLibArtefactHandler
 import org.codehaus.groovy.grails.plugins.freemarker.TagLibPostProcessor
 
  
@@ -58,15 +60,16 @@ Plugin to use Grails Tag Libraries in FreeMarker templates.
  
       def viewResolverBeanDef = delegate.getBeanDefinition("freemarkerViewResolver")
       def viewResolverPropValues = viewResolverBeanDef.propertyValues
-      def suffixPropValue = viewResolverPropValues.getPropertyValue("suffix")
-      
-      viewResolverBeanDef.beanClass = org.codehaus.groovy.grails.plugins.freemarker.DynamicTagLibViewResolver
+      def suffixPropValue = viewResolverPropValues.getPropertyValue("suffix") 
+      //viewResolverBeanDef.beanClass = org.codehaus.groovy.grails.plugins.freemarker.DynamicTagLibViewResolver
+      viewResolverBeanDef.beanClass = org.codehaus.groovy.grails.plugins.freemarker.TagLibAwareViewResolver
 
       def configBeanDef = delegate.getBeanDefinition("freemarkerConfig")
       def configPropValues = configBeanDef.propertyValues
       suffixPropValue = new org.springframework.beans.PropertyValue(suffixPropValue)
       configPropValues.addPropertyValue(suffixPropValue)
-      configBeanDef.beanClass = org.codehaus.groovy.grails.plugins.freemarker.DynamicTagLibConfigurer
+      //configBeanDef.beanClass = org.codehaus.groovy.grails.plugins.freemarker.DynamicTagLibConfigurer
+      configBeanDef.beanClass = org.codehaus.groovy.grails.plugins.freemarker.TagLibAwareConfigurer
       
       // Now go through tag libraries and configure them in spring too. With AOP proxies and so on
       for (taglib in application.tagLibClasses) {
@@ -95,6 +98,25 @@ Plugin to use Grails Tag Libraries in FreeMarker templates.
         // TODO Implement code that is executed when any artefact that this plugin is
         // watching is modified and reloaded. The event contains: event.source,
         // event.application, event.manager, event.ctx, and event.plugin.
+        if (application.isArtefactOfType(TagLibArtefactHandler.TYPE, event.source)) {
+            GrailsClass taglibClass = application.addArtefact(TagLibArtefactHandler.TYPE, event.source)
+            if (taglibClass) {
+                // replace tag library bean
+                def beanName = taglibClass.fullName
+                def beans = beans {
+                    "${beanName}_fm"(taglibClass.clazz) { bean ->
+                        bean.autowire = true
+                        //bean.scope = 'request'
+                    }
+                    
+                    "${TagLibPostProcessor.class.name}"(TagLibPostProcessor) {
+                        grailsApplication = ref('grailsApplication')
+                    }
+                }
+                beans.registerBeans(event.ctx)
+
+            }
+        }
     }
 
     def onConfigChange = { event ->

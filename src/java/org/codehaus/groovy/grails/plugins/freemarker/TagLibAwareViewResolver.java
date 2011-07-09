@@ -23,6 +23,9 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
+/**
+ * @author Daniel Henrique Alves Lima
+ */
 public class TagLibAwareViewResolver extends FreeMarkerViewResolver {
 
     private final Log log = LogFactory.getLog(getClass());
@@ -31,7 +34,7 @@ public class TagLibAwareViewResolver extends FreeMarkerViewResolver {
 
     public TagLibAwareViewResolver() {
         log.debug("constructor()");
-        setViewClass(DynamicTagLibView.class);
+        setViewClass(TagLibAwareView.class);
     }
 
     @Override

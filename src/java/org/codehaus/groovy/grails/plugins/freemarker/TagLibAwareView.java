@@ -21,6 +21,9 @@ import org.springframework.grails.freemarker.GrailsFreeMarkerView;
 
 import freemarker.template.Configuration;
 
+/**
+ * @author Daniel Henrique Alves Lima
+ */
 public class TagLibAwareView extends GrailsFreeMarkerView {
 
     private final Log log = LogFactory.getLog(getClass());
@@ -36,10 +39,10 @@ public class TagLibAwareView extends GrailsFreeMarkerView {
         }
 
         Boolean isConfigured = (Boolean) configuration
-                .getCustomAttribute(AutoConfigHelper.CONFIGURED_ATTRIBUTE_NAME);
+                .getCustomAttribute(AbstractTagLibAwareConfigurer.CONFIGURED_ATTRIBUTE_NAME);
         if (!isConfigured) {
             String message = "FreeMarker Tags configuration is missing: A "
-                    + DynamicTagLibConfigurer.class.getSimpleName()
+                    + getClass().getSimpleName()
                     + " bean should be defined or "
                     + AutoConfigHelper.class.getSimpleName()
                     + ".autoConfigure() should be called manually.";
