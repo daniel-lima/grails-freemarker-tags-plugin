@@ -15,7 +15,9 @@
  */
 import org.codehaus.groovy.grails.commons.GrailsClass
 import org.codehaus.groovy.grails.commons.TagLibArtefactHandler
+import org.codehaus.groovy.grails.plugins.freemarker.AbstractTagLibAwareConfigurer;
 import org.codehaus.groovy.grails.plugins.freemarker.TagLibPostProcessor
+import org.springframework.context.ApplicationContext;
 
  
 class FreemarkerTagsGrailsPlugin {
@@ -38,6 +40,14 @@ class FreemarkerTagsGrailsPlugin {
     def description = '''\\
 Plugin to use Grails Tag Libraries in FreeMarker templates.
 '''
+    
+    // monitor all resources that end with TagLib.groovy
+    //def watchedResources = ['file:./plugins/*/grails-app/taglib/**/*TagLib.groovy',
+    //    'file:./grails-app/taglib/**/*TagLib.groovy']
+
+    def observe = ['groovyPages']
+    
+    def loadAfter = ['groovyPages']
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/freemarker-tags"
@@ -114,7 +124,14 @@ Plugin to use Grails Tag Libraries in FreeMarker templates.
                     }
                 }
                 beans.registerBeans(event.ctx)
+                
+                //event.manager?.getGrailsPlugin('groovyPages')?.doWithDynamicMethods(event.ctx)
 
+                def ApplicationContext springContext = application.mainContext
+                for (configurerBeanName in springContext.getBeanNamesForType(AbstractTagLibAwareConfigurer.class)) {
+                    def configurer = springContext.getBean(configurerBeanName)
+                    configurer.reconfigure()
+                }
             }
         }
     }

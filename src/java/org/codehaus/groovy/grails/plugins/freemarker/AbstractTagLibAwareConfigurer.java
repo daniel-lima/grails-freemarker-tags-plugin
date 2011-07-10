@@ -82,6 +82,17 @@ public abstract class AbstractTagLibAwareConfigurer extends
         // this.helper = new AutoConfigHelper(suffix);
     }
 
+    protected void reconfigure() {
+        Configuration configuration = super.getConfiguration();
+        if (configuration != null) {
+            synchronized (configuration) {
+                configuration
+                        .removeCustomAttribute(AbstractTagLibAwareConfigurer.CONFIGURED_ATTRIBUTE_NAME);
+                reconfigure(configuration);
+            }
+        }
+    }
+
     protected void reconfigure(Configuration configuration) {
         // TODO: Reconfiguration of reloaded tags
         if (configuration != null) {
@@ -95,8 +106,10 @@ public abstract class AbstractTagLibAwareConfigurer extends
                                 .getMainContext();
 
                         Map<String, Map<String, TemplateModel>> sharedVars = new LinkedHashMap<String, Map<String, TemplateModel>>();
-                        for (GrailsClass grailsClass : grailsApplication
-                                .getArtefacts(TagLibArtefactHandler.TYPE)) {
+                        GrailsClass[] tagLibClasses = grailsApplication
+                                .getArtefacts(TagLibArtefactHandler.TYPE);
+
+                        for (GrailsClass grailsClass : tagLibClasses) {
                             GrailsTagLibClass tagLibClass = (GrailsTagLibClass) grailsClass;
                             String namespace = tagLibClass.getNamespace();
 
@@ -119,8 +132,16 @@ public abstract class AbstractTagLibAwareConfigurer extends
                                 if (log.isDebugEnabled()) {
                                     log.debug("reconfigure(): tag " + tagName);
                                 }
-                                Object tagInstanceObject = tagLibInstance
-                                        .getProperty(tagName);
+                                Object tagInstanceObject = null;
+                                try {
+                                    tagInstanceObject = tagLibInstance
+                                            .getProperty(tagName);
+                                } catch (IllegalStateException e) {
+                                    /* Workaround for properties exposed as tags
+                                     * and dependent of RequestAttributes
+                                     */
+                                    log.debug("reconfigure()", e);
+                                }
                                 if (tagInstanceObject != null
                                         && tagInstanceObject instanceof Closure) {
                                     Closure tagInstance = (Closure) tagInstanceObject;
@@ -130,7 +151,6 @@ public abstract class AbstractTagLibAwareConfigurer extends
                                                             tagLibInstance,
                                                             tagInstance));
                                 }
-
                             }
 
                         }
