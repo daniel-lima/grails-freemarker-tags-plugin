@@ -96,15 +96,9 @@ Plugin to use Grails Tag Libraries in FreeMarker templates.
         // TODO
         MetaClass mc = GrailsApplication.class.metaClass
         
-         
-        mc.getFreeMarkerTagsConfig = {
-            
-            println "this ${this}"
-            println "delegate ${delegate}"
-            println "owner ${owner}"
-            
+        mc.getFreemarkerTagsConfig = {
             GrailsApplication app = delegate
-            String propName = '_freeMarkerTagsConfig'
+            String propName = '_freemarkerTagsConfig'
             
             ConfigObject newCfg = null
             if (mc.hasProperty(app, propName)) {
@@ -116,15 +110,15 @@ Plugin to use Grails Tag Libraries in FreeMarker templates.
             if (newCfg == null) {
                 ConfigObject cfg = app.config
                 ConfigObject defaultConfig = new ConfigSlurper(Environment.current.name).parse(FreemarkerTagsDefaultConfig.class)
-                println "defaultConfig ${defaultConfig}"
-                println "cfg ${cfg}"
                 newCfg = new ConfigObject()
-                newCfg.putAll((Map) defaultConfig)
-                newCfg.putAll((Map) cfg)
+                newCfg.merge(defaultConfig)
+                //println "newCfg ${newCfg}"
+                newCfg.merge(cfg)
+                //println "newCfg ${newCfg}"
                 app[propName] = newCfg.grails.plugins.freemarkertags
             }
             
-            return config
+            return app[propName]
         }
     }
 
@@ -162,6 +156,8 @@ Plugin to use Grails Tag Libraries in FreeMarker templates.
                 }
             }
         }
+        
+        doWithDynamicMethods(event.ctx)
     }
 
     def onConfigChange = { event ->

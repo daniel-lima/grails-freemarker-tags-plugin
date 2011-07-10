@@ -25,6 +25,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer
 /**
  * @author Daniel Henrique Alves Lima
  */
+@Deprecated
 class DynamicTagLibConfigurer extends FreeMarkerConfigurer {
 
   private final Log log = LogFactory.getLog(getClass())

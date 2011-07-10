@@ -15,10 +15,17 @@
  */
 package org.codehaus.groovy.grails.plugins.freemarker;
 
+import groovy.lang.MetaClass;
+import groovy.util.ConfigObject;
+
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.groovy.grails.commons.GrailsApplication;
+import org.codehaus.groovy.grails.plugins.support.aware.GrailsApplicationAware;
+import org.codehaus.groovy.runtime.InvokerHelper;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
@@ -26,11 +33,15 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 /**
  * @author Daniel Henrique Alves Lima
  */
-public class TagLibAwareViewResolver extends FreeMarkerViewResolver {
+public class TagLibAwareViewResolver extends FreeMarkerViewResolver implements
+        GrailsApplicationAware {
 
     private final Log log = LogFactory.getLog(getClass());
     private final Log errorLog = LogFactory.getLog(getClass().getName()
             + ".ERROR");
+
+    private GrailsApplication grailsApplication = null;
+    private Boolean hideException = null;
 
     public TagLibAwareViewResolver() {
         log.debug("constructor()");
@@ -46,13 +57,7 @@ public class TagLibAwareViewResolver extends FreeMarkerViewResolver {
         try {
             view = super.loadView(viewName, locale);
         } catch (Exception e) {
-            boolean hideException = false;
-            try {
-                // hideException = helper &&
-                // helper.grailsConfig.viewResolver.legacyHideExceptions
-            } catch (Exception ne) {
-            }
-
+            boolean hideException = isHideException();
             if (hideException) {
                 // return null if an exception occurs so the rest of the view
                 // resolver chain gets an opportunity to generate a View
@@ -78,6 +83,32 @@ public class TagLibAwareViewResolver extends FreeMarkerViewResolver {
         AbstractUrlBasedView view = super.buildView(viewName);
 
         return view;
+    }
+
+    @Override
+    public void setGrailsApplication(GrailsApplication grailsApplication) {
+        this.grailsApplication = grailsApplication;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected boolean isHideException() {
+        try {
+            if (this.hideException == null) {
+                MetaClass mc = InvokerHelper.getMetaRegistry().getMetaClass(
+                        GrailsApplication.class);
+                ConfigObject config = (ConfigObject) mc.getProperty(
+                        this.grailsApplication, "freemarkerTagsConfig");
+                this.hideException = (Boolean) ((Map<String, Object>) config
+                        .get("viewResolver")).get("legacyHideExceptions");
+            }
+
+            return this.hideException != null
+                    && this.hideException.booleanValue();
+        } catch (Exception e) {
+            log.error("isHideException", e);
+        }
+
+        return false;
     }
 
 }

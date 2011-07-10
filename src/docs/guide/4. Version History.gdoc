@@ -13,3 +13,6 @@
 * 0.6.1
 ** Modified atts subclass (LinkedHashMap changed to GroovyPageAttributes)
 ** Fixed calls to closures with an additional parameter (body)
+
+*0.7.0
+** Plugin redesigned for better performance

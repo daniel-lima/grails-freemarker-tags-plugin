@@ -23,6 +23,7 @@ import freemarker.cache.TemplateLoader
 import freemarker.cache.StringTemplateLoader
 
 import grails.util.Environment
+import grails.util.GrailsUtil;
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -33,6 +34,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 /**
  * @author Daniel Henrique Alves Lima
  */
+@Deprecated
 public class AutoConfigHelper {
 
   //public static final String GRAILS_CONFIG_NAMESPACE = "grails.plugins.freemarkertags"
@@ -51,6 +53,7 @@ public class AutoConfigHelper {
   }
 
   public AutoConfigHelper(String ftlExtension) {
+      GrailsUtil.deprecated "${this.class} is deprecated"
     this.ftlExtension = ftlExtension
     if (log.isDebugEnabled()) {
       log.debug("constructor(): ftlExtension '" + ftlExtension + "'")
