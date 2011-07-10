@@ -58,7 +58,7 @@ Plugin to use Grails Tag Libraries in FreeMarker templates.
     }
 
     def doWithSpring = {
-        println 'doWithSpring'
+        //println 'doWithSpring'
       mergeConfig(application)
 
       // Redefinition

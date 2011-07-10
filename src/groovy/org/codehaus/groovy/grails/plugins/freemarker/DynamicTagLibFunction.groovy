@@ -32,10 +32,12 @@ import org.codehaus.groovy.grails.web.metaclass.TagLibDynamicMethods
 /**
  * @author Daniel Henrique Alves Lima
  */
+@Deprecated
 public class DynamicTagLibFunction extends BaseDynamicTagLibSupport implements TemplateMethodModelEx {
 
   public DynamicTagLibFunction(String tagLibName, String tagName) {
     super(tagLibName, tagName)
+    GrailsUtil.deprecated "${getClass()} is deprecated; Use ${TagLibToDirectiveAndFunction.class} instead"
   }
 
   public Object exec(List arguments) throws TemplateModelException {

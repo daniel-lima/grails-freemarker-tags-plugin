@@ -16,9 +16,8 @@
 package org.codehaus.groovy.grails.plugins.freemarker
 
 import java.io.IOException
-
-import java.util.Map
 import java.util.List
+import java.util.Map
 
 import freemarker.core.Environment
 import freemarker.template.TemplateDirectiveBody
@@ -27,16 +26,19 @@ import freemarker.template.TemplateException
 import freemarker.template.TemplateMethodModelEx
 import freemarker.template.TemplateModel
 import freemarker.template.TemplateModelException
+import grails.util.GrailsUtil
 
 /**
  * @author Daniel Henrique Alves Lima
  */
+@Deprecated
 public class DynamicTagLibDirectiveAndFunction implements TemplateDirectiveModel, TemplateMethodModelEx {
 
   private DynamicTagLibDirective directiveImpl
   private DynamicTagLibFunction functionImpl
 
   public DynamicTagLibDirectiveAndFunction(String tagLibName, String tagName) {
+      GrailsUtil.deprecated "${getClass()} is deprecated; Use ${TagLibToDirectiveAndFunction.class} instead"
     this.directiveImpl = new DynamicTagLibDirective(tagLibName, tagName)
     this.functionImpl = new DynamicTagLibFunction(tagLibName, tagName)
   }

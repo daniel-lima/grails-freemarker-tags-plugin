@@ -15,21 +15,23 @@
  */
 package org.codehaus.groovy.grails.plugins.freemarker
 
-import org.springframework.grails.freemarker.GrailsFreeMarkerView
-import freemarker.template.Configuration
-
-
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.springframework.grails.freemarker.GrailsFreeMarkerView
+
+import freemarker.template.Configuration
+import grails.util.GrailsUtil
 
 /**
  * @author Daniel Henrique Alves Lima
  */
+@Deprecated
 public class DynamicTagLibView extends GrailsFreeMarkerView {
 
   private final Log log = LogFactory.getLog(getClass())
 
   public DynamicTagLibView() {
+      GrailsUtil.deprecated "${getClass()} is deprecated; Use ${TagLibAwareView.class} instead"
     log.debug("constructor()")
   }
 

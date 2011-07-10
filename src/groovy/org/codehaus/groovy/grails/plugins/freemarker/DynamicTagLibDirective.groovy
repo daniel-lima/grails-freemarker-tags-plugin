@@ -15,25 +15,19 @@
  */
 package org.codehaus.groovy.grails.plugins.freemarker
 
-import groovy.lang.Closure
-import groovy.lang.GroovyObject
-
-import java.io.IOException
-import java.io.Writer
-import java.util.Map
-
 import freemarker.core.Environment
 import freemarker.template.TemplateDirectiveBody
 import freemarker.template.TemplateDirectiveModel
 import freemarker.template.TemplateException
 import freemarker.template.TemplateModel
 import freemarker.template.TemplateModelException
+import grails.util.GrailsUtil
+import groovy.lang.GroovyObject
+
+import java.io.IOException
+import java.util.Map
 
 import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
-
-import org.codehaus.groovy.grails.commons.ApplicationHolder
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.web.metaclass.TagLibDynamicMethods
 //import org.codehaus.groovy.grails.web.util.StreamCharBuffer
 
@@ -41,10 +35,12 @@ import org.codehaus.groovy.grails.web.metaclass.TagLibDynamicMethods
 /**
  * @author Daniel Henrique Alves Lima
  */
+@Deprecated
 public class DynamicTagLibDirective extends BaseDynamicTagLibSupport implements TemplateDirectiveModel {
 
   public DynamicTagLibDirective(String tagLibName, String tagName) {
     super(tagLibName, tagName)
+    GrailsUtil.deprecated "${getClass()} is deprecated; Use ${TagLibToDirectiveAndFunction.class} instead"
   }
 
   public void execute(Environment env,

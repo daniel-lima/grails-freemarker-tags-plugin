@@ -15,6 +15,7 @@
  */
 package org.codehaus.groovy.grails.plugins.freemarker
 
+import grails.util.GrailsUtil;
 import groovy.lang.GroovyObject
 
 import freemarker.core.Environment
@@ -36,6 +37,7 @@ import org.codehaus.groovy.grails.web.taglib.GroovyPageAttributes
 /**
  * @author Daniel Henrique Alves Lima
  */
+@Deprecated
 public class BaseDynamicTagLibSupport {
 
   protected final Log log = LogFactory.getLog(getClass())
@@ -50,6 +52,7 @@ public class BaseDynamicTagLibSupport {
 
 
   protected BaseDynamicTagLibSupport(String tagLibName, String tagName) {
+    GrailsUtil.deprecated "${getClass()} is deprecated; Use ${TagLibToDirectiveAndFunction.class} instead"
     if (log.isDebugEnabled()) {
       log.debug("constructor(): " + tagLibName + "." + tagName)
     }

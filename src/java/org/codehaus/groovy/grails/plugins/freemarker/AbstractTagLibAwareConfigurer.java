@@ -50,7 +50,7 @@ public abstract class AbstractTagLibAwareConfigurer extends
     @SuppressWarnings("unused")
     private String suffix = null;
 
-    private AutoConfigHelper helper = null;
+    //private AutoConfigHelper helper = null;
 
     private GrailsApplication grailsApplication = null;
 

@@ -15,24 +15,25 @@
  */
 package org.codehaus.groovy.grails.plugins.freemarker
 
+import grails.util.GrailsUtil
+
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-
 import org.springframework.web.servlet.View
 import org.springframework.web.servlet.view.AbstractUrlBasedView
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver
 
-import org.springframework.grails.freemarker.GrailsFreeMarkerViewResolver
-
 /**
  * @author Daniel Henrique Alves Lima
  */
+@Deprecated
 public class DynamicTagLibViewResolver /*extends GrailsFreeMarkerViewResolver*/ extends FreeMarkerViewResolver {
 
   private final Log log = LogFactory.getLog(getClass())
   private final Log errorLog = LogFactory.getLog(getClass().getName() + ".ERROR")
 
   public DynamicTagLibViewResolver() {
+      GrailsUtil.deprecated "${getClass()} is deprecated; Use ${TagLibAwareView.class} instead"
     log.debug("constructor()")
     setViewClass(DynamicTagLibView.class)
   }
