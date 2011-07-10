@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-freemarkertags {
-  autoImport = true
-  defineLegacyFunctions = false
-  asSharedVariables = false
 
-  viewResolver {
-    legacyHideExceptions = false
-    //abc = 10
-  }
+grails {
+    plugins {
+        freemarkertags {
+            /*
+            @Deprecated 
+            autoImport = true
+            defineLegacyFunctions = false
+            asSharedVariables = false
+            */
+
+            viewResolver { legacyHideExceptions = false }
+        }
+    }
 }
