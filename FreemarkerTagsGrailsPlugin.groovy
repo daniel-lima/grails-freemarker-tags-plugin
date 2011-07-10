@@ -13,16 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import grails.util.Environment
+import groovy.util.ConfigObject
+import groovy.util.ConfigSlurper
+
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
 import org.codehaus.groovy.grails.commons.TagLibArtefactHandler
-import org.codehaus.groovy.grails.plugins.freemarker.AbstractTagLibAwareConfigurer;
+import org.codehaus.groovy.grails.plugins.freemarker.AbstractTagLibAwareConfigurer
 import org.codehaus.groovy.grails.plugins.freemarker.TagLibPostProcessor
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContext
 
  
 class FreemarkerTagsGrailsPlugin {
     // the plugin version
-    def version = "0.6.2"
+    def version = "0.7.0"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2.5 > *"
     // the other plugins this plugin depends on
@@ -58,27 +63,18 @@ Plugin to use Grails Tag Libraries in FreeMarker templates.
     }
 
     def doWithSpring = {
-        //println 'doWithSpring'
-      mergeConfig(application)
+      //mergeConfig(application)
 
       // Redefinition
-      /*freemarkerViewResolver(org.codehaus.groovy.grails.plugins.freemarker.DynamicTagLibViewResolver) {
-	prefix = ''
-	suffix = '.ftl'
-	order = 10
-      }*/
- 
       def viewResolverBeanDef = delegate.getBeanDefinition("freemarkerViewResolver")
       def viewResolverPropValues = viewResolverBeanDef.propertyValues
       def suffixPropValue = viewResolverPropValues.getPropertyValue("suffix") 
-      //viewResolverBeanDef.beanClass = org.codehaus.groovy.grails.plugins.freemarker.DynamicTagLibViewResolver
       viewResolverBeanDef.beanClass = org.codehaus.groovy.grails.plugins.freemarker.TagLibAwareViewResolver
 
       def configBeanDef = delegate.getBeanDefinition("freemarkerConfig")
       def configPropValues = configBeanDef.propertyValues
       suffixPropValue = new org.springframework.beans.PropertyValue(suffixPropValue)
       configPropValues.addPropertyValue(suffixPropValue)
-      //configBeanDef.beanClass = org.codehaus.groovy.grails.plugins.freemarker.DynamicTagLibConfigurer
       configBeanDef.beanClass = org.codehaus.groovy.grails.plugins.freemarker.TagLibAwareConfigurer
       
       // Now go through tag libraries and configure them in spring too. With AOP proxies and so on
@@ -98,6 +94,38 @@ Plugin to use Grails Tag Libraries in FreeMarker templates.
 
     def doWithDynamicMethods = { ctx ->
         // TODO
+        MetaClass mc = GrailsApplication.class.metaClass
+        
+         
+        mc.getFreeMarkerTagsConfig = {
+            
+            println "this ${this}"
+            println "delegate ${delegate}"
+            println "owner ${owner}"
+            
+            GrailsApplication app = delegate
+            String propName = '_freeMarkerTagsConfig'
+            
+            ConfigObject newCfg = null
+            if (mc.hasProperty(app, propName)) {
+                newCfg = app[propName]
+            } else {
+               mc[propName] = null
+            }
+            
+            if (newCfg == null) {
+                ConfigObject cfg = app.config
+                ConfigObject defaultConfig = new ConfigSlurper(Environment.current.name).parse(FreemarkerTagsDefaultConfig.class)
+                println "defaultConfig ${defaultConfig}"
+                println "cfg ${cfg}"
+                newCfg = new ConfigObject()
+                newCfg.putAll((Map) defaultConfig)
+                newCfg.putAll((Map) cfg)
+                app[propName] = newCfg.grails.plugins.freemarkertags
+            }
+            
+            return config
+        }
     }
 
     def doWithApplicationContext = { applicationContext ->
