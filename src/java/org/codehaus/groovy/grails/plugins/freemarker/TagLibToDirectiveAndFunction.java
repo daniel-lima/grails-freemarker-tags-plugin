@@ -1,5 +1,6 @@
 package org.codehaus.groovy.grails.plugins.freemarker;
 
+import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
@@ -8,6 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.grails.web.taglib.GroovyPageAttributes;
 
 import freemarker.core.Environment;
@@ -27,7 +30,8 @@ import groovy.lang.GroovyObject;
 public class TagLibToDirectiveAndFunction implements TemplateDirectiveModel,
         TemplateMethodModelEx {
 
-    protected static final Map<String, String> RESERVED_WORDS_TRANSLATION;
+    private static final Map<String, String> RESERVED_WORDS_TRANSLATION;
+    private final Log log = LogFactory.getLog(getClass());
 
     static {
         Map<String, String> m = new LinkedHashMap<String, String>();
@@ -35,21 +39,76 @@ public class TagLibToDirectiveAndFunction implements TemplateDirectiveModel,
         RESERVED_WORDS_TRANSLATION = Collections.unmodifiableMap(m);
     }
 
+    private String namespace;
+    @SuppressWarnings("unused")
     private GroovyObject tagLibInstance;
+    private String tagName;
     private Closure tagInstance;
+    private boolean hasReturnValue;
 
-    public TagLibToDirectiveAndFunction(GroovyObject tagLibInstance,
-            Closure tagInstance) {
+    public TagLibToDirectiveAndFunction(String namespace,
+            GroovyObject tagLibInstance, String tagName, Closure tagInstance,
+            boolean hasReturnValue) {
+        this.namespace = namespace;
         this.tagLibInstance = tagLibInstance;
+        this.tagName = tagName;
         this.tagInstance = tagInstance;
+        this.hasReturnValue = hasReturnValue;
     }
 
     @Override
     public Object exec(@SuppressWarnings("rawtypes") List arguments)
             throws TemplateModelException {
+        if (log.isDebugEnabled()) {
+            log.debug("exec(): @" + namespace + "." + tagName);
+        }
         try {
-            tagInstance.invokeMethod("pushOut", null);
-            return null;
+            CharArrayWriter writer = new CharArrayWriter();
+            tagInstance.invokeMethod("pushOut", writer);
+
+            Object args = null;
+            Object body = null;
+            if (arguments != null) {
+                if (arguments.size() > 0) {
+                    args = arguments.get(0);
+                }
+                if (arguments.size() > 1) {
+                    body = arguments.get(1);
+                }
+            }
+
+            Object result = null;
+            args = args != null ? unwrapParams((TemplateHashModelEx) args,
+                    Boolean.TRUE) : unwrapParams(Collections.EMPTY_MAP,
+                    Boolean.TRUE);
+            if (log.isDebugEnabled()) {
+                log.debug("exec(): args " + args);
+                log.debug("exec(): body " + body);
+            }
+
+            if (tagInstance.getMaximumNumberOfParameters() == 1) {
+                result = tagInstance.call(args);
+            } else {
+                final Object fBody = body;
+                @SuppressWarnings("serial")
+                Closure bodyClosure = new Closure(this) {
+
+                    @SuppressWarnings("unused")
+                    public Object doCall(Object it) throws IOException,
+                            TemplateException {
+                        return fBody;
+                    }
+
+                };
+
+                result = tagInstance.call(new Object[] { args, bodyClosure });
+                if (result == null) {
+                    // writer.flush();
+                    result = writer.toString();
+                }
+            }
+
+            return result;
         } finally {
             tagInstance.invokeMethod("popOut", null);
         }
@@ -60,12 +119,20 @@ public class TagLibToDirectiveAndFunction implements TemplateDirectiveModel,
             @SuppressWarnings("rawtypes") Map params, TemplateModel[] loopVars,
             final TemplateDirectiveBody body) throws TemplateException,
             IOException {
+        if (log.isDebugEnabled()) {
+            log.debug("execute(): @" + namespace + "." + tagName);
+        }
         try {
             tagInstance.invokeMethod("pushOut", env.getOut());
 
             params = unwrapParams(params, Boolean.TRUE);
+            if (log.isDebugEnabled()) {
+                log.debug("execute(): params " + params);
+                log.debug("exec(): body " + body);
+            }
+            Object result = null;
             if (tagInstance.getMaximumNumberOfParameters() == 1) {
-                tagInstance.call(params);
+                result = tagInstance.call(params);
             } else {
                 @SuppressWarnings("serial")
                 Closure bodyClosure = new Closure(this) {
@@ -94,7 +161,11 @@ public class TagLibToDirectiveAndFunction implements TemplateDirectiveModel,
 
                 };
 
-                tagInstance.call(new Object[] { params, bodyClosure });
+                result = tagInstance.call(new Object[] { params, bodyClosure });
+            }
+
+            if (result != null && hasReturnValue) {
+                env.getOut().append(result.toString());
             }
         } finally {
             tagInstance.invokeMethod("popOut", null);

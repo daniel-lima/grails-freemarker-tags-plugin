@@ -15,8 +15,10 @@
  */
 package org.codehaus.groovy.grails.plugins.freemarker;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -127,6 +129,9 @@ public abstract class AbstractTagLibAwareConfigurer extends
                                 sharedVar = new LinkedHashMap<String, TemplateModel>();
                                 sharedVars.put(namespace, sharedVar);
                             }
+                            
+                            Set<String> tagNamesWithReturn = tagLibClass.getTagNamesThatReturnObject();
+                            if (tagNamesWithReturn == null) {tagNamesWithReturn = Collections.emptySet();}
 
                             for (String tagName : tagLibClass.getTagNames()) {
                                 if (log.isDebugEnabled()) {
@@ -137,7 +142,8 @@ public abstract class AbstractTagLibAwareConfigurer extends
                                     tagInstanceObject = tagLibInstance
                                             .getProperty(tagName);
                                 } catch (IllegalStateException e) {
-                                    /* Workaround for properties exposed as tags
+                                    /*
+                                     * Workaround for properties exposed as tags
                                      * and dependent of RequestAttributes
                                      */
                                     log.debug("reconfigure()", e);
@@ -145,11 +151,10 @@ public abstract class AbstractTagLibAwareConfigurer extends
                                 if (tagInstanceObject != null
                                         && tagInstanceObject instanceof Closure) {
                                     Closure tagInstance = (Closure) tagInstanceObject;
-                                    sharedVar
-                                            .put(tagName,
-                                                    new TagLibToDirectiveAndFunction(
-                                                            tagLibInstance,
-                                                            tagInstance));
+                                    sharedVar.put(tagName,
+                                            new TagLibToDirectiveAndFunction(
+                                                    namespace, tagLibInstance,
+                                                    tagName, tagInstance, tagNamesWithReturn.contains(tagName)));
                                 }
                             }
 
