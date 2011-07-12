@@ -19,7 +19,6 @@ import groovy.lang.MetaClass;
 import groovy.util.ConfigObject;
 
 import java.util.Locale;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -98,8 +97,8 @@ public class TagLibAwareViewResolver extends FreeMarkerViewResolver implements
                         GrailsApplication.class);
                 ConfigObject config = (ConfigObject) mc.getProperty(
                         this.grailsApplication, "freemarkerTagsConfig");
-                this.hideException = (Boolean) ((Map<String, Object>) config
-                        .get("viewResolver")).get("legacyHideExceptions");
+                this.hideException = (Boolean) config
+                        .get("viewResolver.legacyHideExceptions");
             }
 
             return this.hideException != null
