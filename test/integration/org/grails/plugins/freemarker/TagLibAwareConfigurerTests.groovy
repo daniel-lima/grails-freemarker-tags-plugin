@@ -65,12 +65,16 @@ class TagLibAwareConfigurerTests extends GroovyTestCase {
     
     void testParseFmTagsTemplateWithoutRequestContext() {
         runInParallel {
-            String result = parseFtlTemplate('[#ftl/][@g.form /]');
-            assertTrue result, result.contains('<form')
-            assertTrue result, result.contains('</form>')
+            String result = parseFtlTemplate('[#ftl/][@g.textField name="abc"/]');
+            assertTrue result, result.contains('<input type="text"')
+            assertTrue result, result.contains('name="abc"')
 
-            result = parseFtlTemplate('[#ftl/]<a href="${g.message({\'code\': \'abc\', \'default\': \'xyz\'})}">');
-            assertEquals '<a href="xyz">', result
+            try {
+                result = parseFtlTemplate('[#ftl/][@g.message code="abc" default="xyz" /]');
+                fail('This tag cannot run without a thread-bound request')
+            } catch (e) {
+                assertTrue e.message.contains('No thread-bound request found:')
+            }
         } 
     }
     
