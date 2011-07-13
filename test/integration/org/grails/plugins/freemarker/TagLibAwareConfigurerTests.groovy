@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.codehaus.groovy.grails.plugins.freemarker
+package org.grails.plugins.freemarker
 
 import freemarker.template.Configuration
 import freemarker.template.Template
@@ -64,22 +64,14 @@ class TagLibAwareConfigurerTests extends GroovyTestCase {
     
     
     void testParseFmTagsTemplateWithoutRequestContext() {
-        String result = null
-        def x = {
-            result = parseFtlTemplate('[#ftl/][@g.form /]');
+        runInParallel {
+            String result = parseFtlTemplate('[#ftl/][@g.form /]');
             assertTrue result, result.contains('<form')
             assertTrue result, result.contains('</form>')
 
             result = parseFtlTemplate('[#ftl/]<a href="${g.message({\'code\': \'abc\', \'default\': \'xyz\'})}">');
             assertEquals '<a href="xyz">', result
-        } as Runnable
-
-        x = new Thread(myThreadGroup, x); x.daemon = true; x.start()
-        while (x.isAlive()) {
-            Thread.sleep 1000
-        }
-
-        if (threadException) throw threadException
+        } 
     }
     
     private parseFtlTemplate = {String templateSourceCode, Map binding = [:] ->
@@ -88,6 +80,24 @@ class TagLibAwareConfigurerTests extends GroovyTestCase {
         Template template = new Template('template', new StringReader(templateSourceCode), cfg)
         template.process (binding, sWriter)
         return sWriter.toString()
+    }
+    
+    private runInParallel = {Closure c ->
+        if (threadException != null) {throw threadException}
+        def thread = null; boolean executed = false 
+        Closure c1 = {
+            try {
+                c()
+            } finally {
+                executed = true
+            }
+        }
+        
+        thread = new Thread(myThreadGroup, c1 as Runnable); thread.daemon = true; thread.start()
+        while (thread.isAlive() && !executed) {
+            Thread.sleep 1000
+        }
+        if (threadException != null) {throw threadException}
     }
     
 }

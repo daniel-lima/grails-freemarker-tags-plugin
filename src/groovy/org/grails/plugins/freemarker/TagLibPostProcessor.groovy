@@ -1,4 +1,4 @@
-package org.codehaus.groovy.grails.plugins.freemarker
+package org.grails.plugins.freemarker
 
 import org.codehaus.groovy.grails.commons.ArtefactHandler;
 import org.codehaus.groovy.grails.commons.GrailsApplication

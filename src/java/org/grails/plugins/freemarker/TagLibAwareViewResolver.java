@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.codehaus.groovy.grails.plugins.freemarker;
+package org.grails.plugins.freemarker;
 
 import groovy.lang.MetaClass;
 import groovy.util.ConfigObject;

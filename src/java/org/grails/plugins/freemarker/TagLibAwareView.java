@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.codehaus.groovy.grails.plugins.freemarker;
+package org.grails.plugins.freemarker;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,9 +43,7 @@ public class TagLibAwareView extends GrailsFreeMarkerView {
         if (!isConfigured) {
             String message = "FreeMarker Tags configuration is missing: A "
                     + getClass().getSimpleName()
-                    + " bean should be defined or "
-                    + AutoConfigHelper.class.getSimpleName()
-                    + ".autoConfigure() should be called manually.";
+                    + " bean should be defined.";
             log.error("setConfiguration(): " + message);
             throw new RuntimeException(message);
         }
