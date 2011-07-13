@@ -127,6 +127,8 @@ public class TagLibToDirectiveAndFunction implements TemplateDirectiveModel,
             }
 
             return result;
+        } catch (RuntimeException e) {
+            throw new TemplateModelException(e);
         } finally {
             tagInstance.invokeMethod("popOut", null);
         }
@@ -185,6 +187,8 @@ public class TagLibToDirectiveAndFunction implements TemplateDirectiveModel,
             if (result != null && hasReturnValue) {
                 env.getOut().append(result.toString());
             }
+        } catch (RuntimeException e) {
+            throw new TemplateException(e, env);
         } finally {
             tagInstance.invokeMethod("popOut", null);
         }

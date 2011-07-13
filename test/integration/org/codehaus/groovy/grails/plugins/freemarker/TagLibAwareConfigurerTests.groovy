@@ -27,11 +27,11 @@ class TagLibAwareConfigurerTests extends GroovyTestCase {
 
     def freemarkerConfig
     private StringWriter sWriter = new StringWriter()
-
-
+    private Exception threadException
+    private ThreadGroup myThreadGroup = new ThreadGroup('x') {public void uncaughtException(Thread t,Throwable e) {super.uncaughtException(t, e); threadException = e}}
     
     protected void setUp() {
-        super.setUp()
+        super.setUp(); threadException = null
     }
 
     protected void tearDown() {
@@ -62,6 +62,26 @@ class TagLibAwareConfigurerTests extends GroovyTestCase {
     }
     
     
+    
+    void testParseFmTagsTemplateWithoutRequestContext() {
+        String result = null
+        def x = {
+            result = parseFtlTemplate('[#ftl/][@g.form /]');
+            assertTrue result, result.contains('<form')
+            assertTrue result, result.contains('</form>')
+
+            result = parseFtlTemplate('[#ftl/]<a href="${g.message({\'code\': \'abc\', \'default\': \'xyz\'})}">');
+            assertEquals '<a href="xyz">', result
+        } as Runnable
+
+        x = new Thread(myThreadGroup, x); x.daemon = true; x.start()
+        while (x.isAlive()) {
+            Thread.sleep 1000
+        }
+
+        if (threadException) throw threadException
+    }
+    
     private parseFtlTemplate = {String templateSourceCode, Map binding = [:] ->
         if (sWriter.buffer.length() > 0) {sWriter.buffer.delete 0, sWriter.buffer.length()}
         Configuration cfg = freemarkerConfig.configuration
@@ -69,4 +89,5 @@ class TagLibAwareConfigurerTests extends GroovyTestCase {
         template.process (binding, sWriter)
         return sWriter.toString()
     }
+    
 }
