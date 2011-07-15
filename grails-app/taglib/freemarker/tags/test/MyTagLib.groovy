@@ -16,7 +16,7 @@ class MyTagLib {
     def sum = { attrs ->
         int sum = 0
         for (attValue in attrs.values()) {
-            sum += attValue
+            sum += attValue.toInteger()
         }
         return sum
     }
