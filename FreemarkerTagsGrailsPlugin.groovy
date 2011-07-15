@@ -36,7 +36,9 @@ class FreemarkerTagsGrailsPlugin {
     def pluginExcludes = [
       "grails-app/views/*",
       "grails-app/i18n/*",
-      'grails-app/taglib/**/test/**/*'
+      'grails-app/taglib/**/test/**/*',
+      'scripts/**/Eclipse.groovy',
+      'web-app/**/*'
     ]
 
     // TODO Fill in these fields
