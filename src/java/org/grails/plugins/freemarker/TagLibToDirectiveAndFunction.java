@@ -51,6 +51,16 @@ public class TagLibToDirectiveAndFunction implements TemplateDirectiveModel,
     private static final Map<String, String> RESERVED_WORDS_TRANSLATION;
     private final Log log = LogFactory.getLog(getClass());
 
+    @SuppressWarnings("serial")
+    private static final Closure EMPTY_BODY = new Closure(
+            TagLibToDirectiveAndFunction.class) {
+        @SuppressWarnings("unused")
+        public Object doCall(Object[] it) throws IOException, TemplateException {
+            return "";
+        }
+
+    };
+
     static {
         Map<String, String> m = new LinkedHashMap<String, String>();
         m.put("as", "_as");
@@ -74,6 +84,7 @@ public class TagLibToDirectiveAndFunction implements TemplateDirectiveModel,
         this.hasReturnValue = hasReturnValue;
     }
 
+    @SuppressWarnings("serial")
     @Override
     public Object exec(@SuppressWarnings("rawtypes") List arguments)
             throws TemplateModelException {
@@ -107,17 +118,20 @@ public class TagLibToDirectiveAndFunction implements TemplateDirectiveModel,
             if (tagInstance.getMaximumNumberOfParameters() == 1) {
                 result = tagInstance.call(args);
             } else {
-                final Object fBody = body;
-                @SuppressWarnings("serial")
-                Closure bodyClosure = new Closure(this) {
+                Closure bodyClosure = EMPTY_BODY;
 
-                    @SuppressWarnings("unused")
-                    public Object doCall(Object it) throws IOException,
-                            TemplateException {
-                        return fBody;
-                    }
+                if (body != null || hasReturnValue) {
+                    final Object fBody = body;
+                    bodyClosure = new Closure(this) {
 
-                };
+                        @SuppressWarnings("unused")
+                        public Object doCall(Object it) throws IOException,
+                                TemplateException {
+                            return fBody;
+                        }
+
+                    };
+                }
 
                 result = tagInstance.call(new Object[] { args, bodyClosure });
                 if (result == null) {
@@ -134,6 +148,7 @@ public class TagLibToDirectiveAndFunction implements TemplateDirectiveModel,
         }
     }
 
+    @SuppressWarnings("serial")
     @Override
     public void execute(final Environment env,
             @SuppressWarnings("rawtypes") Map params, TemplateModel[] loopVars,
@@ -154,36 +169,84 @@ public class TagLibToDirectiveAndFunction implements TemplateDirectiveModel,
             if (tagInstance.getMaximumNumberOfParameters() == 1) {
                 result = tagInstance.call(params);
             } else {
-                @SuppressWarnings("serial")
-                Closure bodyClosure = new Closure(this) {
+                Closure bodyClosure = EMPTY_BODY;
 
-                    @SuppressWarnings("unused")
-                    public void doCall(Object it) throws IOException,
-                            TemplateException {
-                        if (body != null) {
+                if (body != null) {
+                    bodyClosure = new Closure(this) {
+
+                        @SuppressWarnings({ "unused", "rawtypes", "unchecked" })
+                        public Object doCall(Object it) throws IOException,
+                                TemplateException {
+
                             ObjectWrapper objectWrapper = env
                                     .getObjectWrapper();
-                            TemplateModel oldIt = env.getVariable("it");
+                            Map<String, TemplateModel> oldVariables = null;
+                            TemplateModel oldIt = null;
+
+                            if (log.isDebugEnabled()) {
+                                log.debug("it " + it);
+                            }
+
+                            boolean itIsAMap = false;
+                            if (it != null) {
+                                if (it instanceof Map) {
+                                    itIsAMap = true;
+                                    oldVariables = new LinkedHashMap<String, TemplateModel>();
+                                    Map<String, Object> itMap = (Map) it;
+                                    for (Map.Entry<String, Object> entry : itMap
+                                            .entrySet()) {
+                                        oldVariables
+                                                .put(entry.getKey(), env
+                                                        .getVariable(entry
+                                                                .getKey()));
+                                    }
+                                } else {
+                                    oldIt = env.getVariable("it");
+                                }
+                            }
+
                             try {
                                 if (it != null) {
-                                    env.setVariable("it",
-                                            objectWrapper.wrap(it));
+                                    if (itIsAMap) {
+                                        Map<String, Object> itMap = (Map) it;
+                                        for (Map.Entry<String, Object> entry : itMap
+                                                .entrySet()) {
+                                            env.setVariable(entry.getKey(),
+                                                    objectWrapper.wrap(entry
+                                                            .getValue()));
+                                        }
+                                    } else {
+                                        env.setVariable("it",
+                                                objectWrapper.wrap(it));
+                                    }
                                 }
                                 body.render((Writer) tagInstance
                                         .getProperty("out"));
                             } finally {
-                                if (oldIt != null) {
+                                if (oldVariables != null) {
+                                    for (Map.Entry<String, TemplateModel> entry : oldVariables
+                                            .entrySet()) {
+                                        env.setVariable(entry.getKey(),
+                                                entry.getValue());
+                                    }
+                                } else if (oldIt != null) {
                                     env.setVariable("it", oldIt);
                                 }
                             }
-                        }
-                    }
 
-                };
+                            return "";
+                        }
+
+                    };
+                }
 
                 result = tagInstance.call(new Object[] { params, bodyClosure });
             }
 
+            if (log.isDebugEnabled()) {
+                log.debug("hasReturnValue " + hasReturnValue);
+                log.debug("result " + result);
+            }
             if (result != null && hasReturnValue) {
                 env.getOut().append(result.toString());
             }

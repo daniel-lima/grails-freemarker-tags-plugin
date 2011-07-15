@@ -35,7 +35,8 @@ class FreemarkerTagsGrailsPlugin {
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
       "grails-app/views/*",
-      "grails-app/i18n/*"
+      "grails-app/i18n/*",
+      'grails-app/taglib/**/test/**/*'
     ]
 
     // TODO Fill in these fields

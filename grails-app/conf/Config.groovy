@@ -21,6 +21,8 @@ log4j = {
            'net.sf.ehcache.hibernate'
 
     warn   'org.mortbay.log'
+    
+    debug  'org.grails.plugins.freemarker'
 }
 
 // The following properties have been added by the Upgrade process...
