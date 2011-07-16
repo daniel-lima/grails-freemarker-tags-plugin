@@ -19,4 +19,5 @@
 ** Directives and functions will always be exposed as shared variables
 ** GroovyPageOutputStack is no longer used
 ** autoImport, defineLegacyFunctions and asSharedVariables options are no longer supported
-** Tags that are independent of specific Servlet objects or scopes can now be used without a thread-bound request 
+** Tags that are independent of specific Servlet objects or scopes can now be used without a thread-bound request
+** Classes deprecated
