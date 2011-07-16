@@ -15,4 +15,8 @@
 ** Fixed calls to closures with an additional parameter (body)
 
 *0.7.0
-** Plugin redesigned for better performance
+** Major redesign to improve the performance (breaking changes)
+** Directives and functions will always be exposed as shared variables
+** GroovyPageOutputStack is no longer used
+** autoImport, defineLegacyFunctions and asSharedVariables options are no longer supported
+** Tags that are independent of specific Servlet objects or scopes can now be used without a thread-bound request 

@@ -43,6 +43,14 @@ class TagLibAwareConfigurerTests extends GroovyTestCase {
         assertTrue freemarkerConfig instanceof AbstractTagLibAwareConfigurer        
     }
     
+    void testAvailableTagLibs() {
+        Configuration config = freemarkerConfig.configuration
+        Set names = config.getSharedVariableNames()
+        assertTrue names.contains('g')
+        assertTrue names.contains('plugin')
+        assertTrue names.contains('sitemesh')
+    }
+    
     void testParseRegularTemplate() {
         String result = parseFtlTemplate('[#ftl/]${s}', [s: 'ok']);
         assertEquals 'ok', result
@@ -97,7 +105,7 @@ class TagLibAwareConfigurerTests extends GroovyTestCase {
             }
         }
         
-        thread = new Thread(myThreadGroup, c1 as Runnable); thread.daemon = true; thread.start()
+        thread = new Thread(myThreadGroup, c1 as Runnable); thread.daemon = true; thread.start(); thread.yield()
         while (thread.isAlive() && !executed) {
             Thread.sleep 1000
         }

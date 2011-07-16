@@ -38,4 +38,8 @@ class SimpleTagLib {
         }
     }
     
+    def thread = { attrs ->
+        out << "Thread-${attrs.name}"
+    }
+    
 }
