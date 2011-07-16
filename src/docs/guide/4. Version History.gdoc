@@ -14,7 +14,7 @@
 ** Modified atts subclass (LinkedHashMap changed to GroovyPageAttributes)
 ** Fixed calls to closures with an additional parameter (body)
 
-*0.7.0
+* 0.7.0
 ** Major redesign to improve the performance (breaking changes)
 ** Directives and functions will always be exposed as shared variables
 ** GroovyPageOutputStack is no longer used
