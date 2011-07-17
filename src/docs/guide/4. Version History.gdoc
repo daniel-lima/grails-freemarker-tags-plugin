@@ -21,3 +21,6 @@
 ** autoImport, defineLegacyFunctions and asSharedVariables options are no longer supported
 ** Tags that are independent of specific Servlet objects or scopes can now be used without a thread-bound request
 ** Classes deprecated
+
+* 0.7.1
+** Preparing the plugin to be compatible with Grails 2.0.0

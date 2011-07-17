@@ -27,8 +27,6 @@ import freemarker.template.TemplateModelException
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
-import org.codehaus.groovy.grails.web.metaclass.TagLibDynamicMethods
-
 /**
  * @author Daniel Henrique Alves Lima
  */
@@ -70,7 +68,7 @@ public class DynamicTagLibFunction extends BaseDynamicTagLibSupport implements T
       if (log.isDebugEnabled()) {
 	log.debug("exec(): writer " + writer)
       }
-      tagLib.setProperty(TagLibDynamicMethods.OUT_PROPERTY, writer);
+      tagLib.setProperty('out', writer);
       logCurrentOutput()
       //tagLib.out = writer
       restoreOut = true

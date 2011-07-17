@@ -15,8 +15,8 @@
  */
 package org.grails.plugins.freemarker;
 
-import groovy.lang.MetaClass;
 import groovy.util.ConfigObject;
+import groovy.util.Eval;
 
 import java.util.Locale;
 
@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.codehaus.groovy.grails.plugins.support.aware.GrailsApplicationAware;
-import org.codehaus.groovy.runtime.InvokerHelper;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
@@ -89,20 +88,27 @@ public class TagLibAwareViewResolver extends FreeMarkerViewResolver implements
         this.grailsApplication = grailsApplication;
     }
 
-    @SuppressWarnings("unchecked")
     protected boolean isHideException() {
         try {
             if (this.hideException == null) {
-                MetaClass mc = InvokerHelper.getMetaRegistry().getMetaClass(
-                        GrailsApplication.class);
-                ConfigObject config = (ConfigObject) mc.getProperty(
-                        this.grailsApplication, "freemarkerTagsConfig");
-                this.hideException = (Boolean) config
-                        .get("viewResolver.legacyHideExceptions");
+                ConfigObject config = (ConfigObject) Eval.x(
+                        this.grailsApplication, "x.freemarkerTagsConfig");
+                if (log.isDebugEnabled()) {
+                    log.debug("isHideException(): config = " + config);
+                }
+                Object v = Eval.x(config, "x.viewResolver.legacyHideExceptions");
+                if (log.isDebugEnabled()) {
+                    log.debug("isHideException(): v = " + v);
+                }
+                Boolean hideException = Boolean.FALSE;
+                if (v != null && v instanceof Boolean) {
+                    hideException = (Boolean) v;
+                }
+
+                this.hideException = hideException;
             }
 
-            return this.hideException != null
-                    && this.hideException.booleanValue();
+            return this.hideException.booleanValue();
         } catch (Exception e) {
             log.error("isHideException", e);
         }

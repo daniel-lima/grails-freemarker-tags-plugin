@@ -28,8 +28,6 @@ import java.io.IOException
 import java.util.Map
 
 import org.apache.commons.logging.Log
-import org.codehaus.groovy.grails.web.metaclass.TagLibDynamicMethods
-//import org.codehaus.groovy.grails.web.util.StreamCharBuffer
 
 
 /**
@@ -69,7 +67,7 @@ public class DynamicTagLibDirective extends BaseDynamicTagLibSupport implements 
       if (log.isDebugEnabled()) {
 	log.debug("execute(): out = " + env.getOut())
       }
-      tagLib.setProperty(TagLibDynamicMethods.OUT_PROPERTY, env.getOut());
+      tagLib.setProperty('out', env.getOut());
       //tagLib.out = env.getOut()
       restoreOut = true
       logCurrentOutput()
