@@ -24,3 +24,7 @@
 
 * 0.7.1
 ** Preparing the plugin to be compatible with Grails 2.0.0
+
+* 0.7.2
+** Deprecated classes removed
+** Preparing the plugin to be compatible with FreeMarker plugin 0.4

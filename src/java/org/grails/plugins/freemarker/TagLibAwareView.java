@@ -17,9 +17,9 @@ package org.grails.plugins.freemarker;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.grails.freemarker.GrailsFreeMarkerView;
 
 import freemarker.template.Configuration;
+import grails.plugin.freemarker.GrailsFreeMarkerView;
 
 /**
  * @author Daniel Henrique Alves Lima
