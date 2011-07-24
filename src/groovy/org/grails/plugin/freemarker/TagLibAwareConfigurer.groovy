@@ -1,4 +1,4 @@
-package org.grails.plugins.freemarker
+package org.grails.plugin.freemarker
 
 import groovy.lang.GroovyObject;
 

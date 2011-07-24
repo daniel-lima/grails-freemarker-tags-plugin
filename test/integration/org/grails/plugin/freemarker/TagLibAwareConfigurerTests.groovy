@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.grails.plugins.freemarker
+package org.grails.plugin.freemarker
 
 import freemarker.template.Configuration
 import freemarker.template.Template

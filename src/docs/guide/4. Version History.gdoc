@@ -28,3 +28,4 @@
 * 0.7.2
 ** Deprecated classes removed
 ** Preparing the plugin to be compatible with FreeMarker plugin 0.4
+** Packages renamed to meet the standard

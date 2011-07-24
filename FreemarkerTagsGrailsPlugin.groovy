@@ -20,8 +20,8 @@ import groovy.util.ConfigSlurper
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClass
 import org.codehaus.groovy.grails.commons.TagLibArtefactHandler
-import org.grails.plugins.freemarker.AbstractTagLibAwareConfigurer
-import org.grails.plugins.freemarker.TagLibPostProcessor
+import org.grails.plugin.freemarker.AbstractTagLibAwareConfigurer
+import org.grails.plugin.freemarker.TagLibPostProcessor
 import org.springframework.context.ApplicationContext
 
  
@@ -72,13 +72,13 @@ Plugin to use Grails Tag Libraries in FreeMarker templates.
       def viewResolverBeanDef = delegate.getBeanDefinition("freemarkerViewResolver")
       def viewResolverPropValues = viewResolverBeanDef.propertyValues
       def suffixPropValue = viewResolverPropValues.getPropertyValue("suffix") 
-      viewResolverBeanDef.beanClass = org.grails.plugins.freemarker.TagLibAwareViewResolver
+      viewResolverBeanDef.beanClass = org.grails.plugin.freemarker.TagLibAwareViewResolver
 
       def configBeanDef = delegate.getBeanDefinition("freemarkerConfig")
       def configPropValues = configBeanDef.propertyValues
       suffixPropValue = new org.springframework.beans.PropertyValue(suffixPropValue)
       configPropValues.addPropertyValue(suffixPropValue)
-      configBeanDef.beanClass = org.grails.plugins.freemarker.TagLibAwareConfigurer
+      configBeanDef.beanClass = org.grails.plugin.freemarker.TagLibAwareConfigurer
       
       // Now go through tag libraries and configure them in spring too. With AOP proxies and so on
       for (taglib in application.tagLibClasses) {
