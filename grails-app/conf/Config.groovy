@@ -22,8 +22,8 @@ log4j = {
 
     warn   'org.mortbay.log'
     
-    //debug  'org.grails.plugins.freemarker'
-    debug  'org.grails.plugins.freemarker.TagLibAwareViewResolver'
+    //debug  'org.grails.plugin.freemarker'
+    debug  'org.grails.plugin.freemarker.TagLibAwareViewResolver'
 }
 
 // The following properties have been added by the Upgrade process...
