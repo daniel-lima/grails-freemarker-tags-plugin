@@ -44,7 +44,7 @@ class FreemarkerTagsGrailsPlugin {
     // TODO Fill in these fields
     def author = "Daniel Henrique Alves Lima"
     def authorEmail = "email_daniel_h@yahoo.com.br"
-    def title = "Plugin to use Grails Tag Libraries in FreeMarker templates"
+    def title = 'Grails FreeMarker Tags Plugin'
     def description = '''\\
 Plugin to use Grails Tag Libraries in FreeMarker templates.
 '''
